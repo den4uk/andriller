@@ -1,0 +1,22 @@
+dist: xenial   # required for Python >= 3.7
+language: python
+python:
+  - "3.6"
+  - "3.7"
+install:
+  - pip install pip -U
+  - pip install pytest-cov flake8
+  - pip install -r requirements.txt
+script:
+  - flake8 --ignore=E128,E501,E731 --statistics andriller/
+  - pytest --cov=andriller tests/
+deploy:
+  provider: pypi
+  user: denco
+  password:
+    secure: hNOvn3E5OOlXu4qeGi5Ge9gPzOVzVdtPvSXLWtS6nG1X2cFAxpijuyaAvJyEa7ebpGmd1Rf1ri6QU3oQCGmKH+xogkRce3roPHxd/DzEx6S8GbQEfhFp1xTV5Qd5R08J1/oOuRlQ8gzKTmvtYn2G6kM8oXPIMfcVhuDvG9JUdxjT2YimhJ/p3slys4ezn/EK5KqFFcI8p3vf/180/SKRUKlUO6WSHf2VHNFjKYwGgvgojUQT4hc4Xk76t4cXsSdciBsAiu+9u7cd6vNyRh72B8YgMwHKO7v46+5ViCZrxSOiLTe5UCYq9csCMDiTbXDq8Pg1nOpHjJEhv08TL8r2WXnqxQLbaBpWX1V+6bva438r4KwcYG8hQBsAKqub6+Qzn6gBYqj036MlF/7IP0QsqXRumOgv+Y34JCrBR8RSA2xqJxxQ42LHD3T3OrF0hmeQ+B5W0iipOJ0VdLRlCndHCHSAa2WOtH5MuCV7NWfXX4O+uxKu7HUjtnI546v6i1oXf3iySDpoeixJm6H4n82g5f3R/TGA0icPGfsVXmdynZDiMMwatrKc+vu/DJ4WPu8mo5U+OMYah07WdURfq9zkyC8ZWSgGb+L2wiPh+gbNcCINZIGmV1eDXjrfMZ5jmJDQkMxCyX8PANqRlxmYJuQ5gyHrz+uQt85JHqgTil3G/rg=
+  skip_existing: true
+  distributions: "bdist_wheel"
+  on:
+    branch: master
+    tags: true

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Index Page{% endblock title %}
+
+{% block content %}
+<h3 align="center">[Andriller Report]</h3>
+<table class="table table-striped" align="center">
+    <tr>
+        <th>Type</th>
+        <th>Data</th>
+    </tr>
+    {% for k, v in report %}
+    {% if v %}
+    <tr>
+        <td>{{k.title()}}</td>
+        <td>
+            {% if k == 'accounts' %}
+            <ul>
+                {% for x in v %}
+                <li>{{x[0]}}: {{x[1]}}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            {{v}}
+            {% endif %}
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+
+    {% for d in decoded %}
+    <tr>
+        <td>Application</td>
+        <td>
+            <a href="{{d[0]}}">{{d[1]}}</a>
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+{% endblock content %}

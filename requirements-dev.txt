@@ -1,0 +1,6 @@
+-r requirements.txt
+-e .
+tox
+wheel
+pytest-cov
+bumpversion

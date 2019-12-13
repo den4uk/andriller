@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td nowrap="nowrap">{{item._id|default(loop.index, true)}}</td>
+        <td>
+            {{item.sender.number}} ({{item.sender.name}})
+        </td>
+        <td>
+            {% if item.recipients|length == 1 %}
+            {{item.recipients[0].number}} ({{item.recipients[0].name}})
+            {% elif item.recipients|length > 1 %}
+            <details>
+                <summary>{{item.recipients|length}} Recipients</summary>
+                {% for p in item.recipients %}
+                {{p.number}} ({{p.name}}){% if not loop.last %}<br>{% endif %}
+                {% endfor %}
+            </details>
+            {% endif %}
+        </td>
+        <td>
+            {{item.body|default('', true)|e|nl2br}}
+            {% if item.msg_info %}
+            {% include 'viber_media.html' %}
+            {% endif %}
+        </td>
+        <td nowrap="nowrap">{{item.send_type|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.msg_date|default('', true)}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

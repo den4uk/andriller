@@ -1,0 +1,30 @@
+<div>
+    {% if item.recipients|length < 2 %}
+    {% for r in item.recipients %}
+        <div title="{{r.user_key}}">
+            {% if r.user_key %}
+            <a href="https://www.facebook.com/app_scoped_user_id/{{r.user_key.split(':')[1]}}">
+                {{ r.name }}
+            </a>
+            {% else %}
+                {{ r.name }}
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <details>
+        <summary>{{item.recipients|length}} Recipients</summary>
+        {% for r in item.recipients %}
+        <div title="{{r.user_key}}">
+            {% if r.user_key %}
+            <a href="https://www.facebook.com/app_scoped_user_id/{{r.user_key.split(':')[1]}}">
+                {{ r.name }}
+            </a>
+            {% else %}
+            {{ r.name }}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </details>
+    {% endif %}
+</div>

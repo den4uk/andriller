@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% include 'style.html' %}
+    <title>
+        Andriller | {% block title %}Report{% endblock title %}
+    </title>
+</head>
+<body>
+    <h4 align="center">{{custom_header}}</h4>
+    {% block content %}
+    {% endblock content %}
+    <p align="center">{{custom_footer}}</p>
+</body>
+</html>

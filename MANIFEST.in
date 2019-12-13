@@ -1,0 +1,12 @@
+include README.md
+include requirements.txt
+recursive-include andriller/bin *
+recursive-include andriller/res *
+recursive-include andriller/templates *
+global-exclude env
+global-exclude .tox
+global-exclude .coverage
+global-exclude htmlcov
+global-exclude __pycache__
+global-exclude .git/
+global-exclude *.py[coxd]

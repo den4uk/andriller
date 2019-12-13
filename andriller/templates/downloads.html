@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td nowrap="nowrap">{{item._id|default(loop.index, true)}}</td>
+        <td nowrap="nowrap">
+            {% if item.method != None %}
+            <a href="{{item.uri}}">
+                {{item.uri|default('', true)|truncate(60, True)}}
+            </a>
+            {% endif %}
+        </td>
+        <td nowrap="nowrap">
+            {% if item._data %}
+            <details>
+                <summary>{{item.title}}</summary>
+                {{item._data|default('', true)}}
+            </details>
+            {% else %}
+            {{item.title}}
+            {% endif %}
+        </td>
+        <td nowrap="nowrap">{{item.notificationpackage|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.total_size|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.status|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.lastmod|default('', true)}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

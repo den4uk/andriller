@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td nowrap="nowrap">{{item._id|default(loop.index, true)}}</td>
+        <td nowrap="nowrap">{{item.filename|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.capture_timestamp|default('', true)}}</td>
+        <td nowrap="nowrap">
+            <a href="{{item.map_uri}}" target="_blank">
+                {{item.lat_lon|default('', true)}}
+            </a>
+        </td>
+        <td nowrap="nowrap">{{item.camera|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.local|default('', true)}}</td>
+        <td nowrap="nowrap">
+            <a href="{{item.remote_url}}" target="_blank">
+                {{item.dedup_key}}
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

@@ -1,0 +1,18 @@
+{% for share in item.shares %}
+<div style="border-radius:30px; border: 1px solid #C0C0C0; padding:20px">
+    <strong>
+        <a href="{{share.href|default('', true)}}" target="_blank">
+            {{share.name|default('', true)}}
+        </a>
+    </strong>
+    <p>{{share.caption|default('', true)}}</p>
+    <small>{{share.description|default('', true)}}</small><br/>
+    {% if share.media %}
+    {% for media in share.media %}
+    <a href="{{media.href|default('', true)}}" target="_blank">
+        <img src="{{media.src}}" height="150">
+    </a>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endfor %}

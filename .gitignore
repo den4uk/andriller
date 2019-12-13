@@ -1,0 +1,15 @@
+__pycache__/
+build/
+dist/
+env/
+*.egg-info
+*.py[coxd]
+*.log
+.DS_Store
+.tox/
+.pytype/
+.coverage*
+htmlcov/
+.pytest_cache
+.vscode
+.idea

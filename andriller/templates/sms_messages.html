@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td>{{item._id|default(loop.index, true)}}</td>
+        <td>{{item.address|default('', true)}}</td>
+        <td>{{item.body|default('', true)|e|nl2br}}</td>
+        <td nowrap="nowrap">{{item.date|default('', true)}}</td>
+        <td>{{item.type|default('', true)}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

@@ -1,0 +1,57 @@
+<div style="border-radius:30px; border: 1px solid #C0C0C0; padding:20px">
+    {% if item.media.title %}
+    <div><h3>{{item.media.title}}</h3></div>
+    {% endif %}
+
+    {% if item.media.Title %}
+    <div><h3>{{item.media.Title}}</h3></div>
+    {% endif %}
+
+    {% if item.media.Text %}
+    <div>{{item.media.Text}}</div>
+    {% endif %}
+
+    {% if item.media.thumbnail %}
+    <div>
+        <img src="{{item.media.thumbnail}}" alt="{{item.media.thumbnail}}" height="200">
+    </div>
+    {% endif %}
+
+    {% if item.media.ThumbnailURL %}
+    <div>
+        <img src="{{item.media.ThumbnailURL}}" alt="{{item.media.ThumbnailURL}}" height="200">
+    </div>
+    {% endif %}
+
+    {% if item.media.Image %}
+    <div>
+        <img src="{{item.media.Image}}" alt="{{item.media.Image}}" height="200">
+    </div>
+    {% endif %}
+
+    {% if item.media.FileName %}
+    <div>{{item.media.FileName}}</div>
+    {% endif %}
+
+    {% if item.media.url %}
+    <div>
+        <a href="{{item.media.url}}" target="_blank">{{item.media.url}}</a>
+    </div>
+    {% endif %}
+
+    {% if item.media.ActionBody %}
+    <div>
+        <a href="{{item.media.ActionBody}}" target="_blank">{{item.media.ActionBody}}</a>
+    </div>
+    {% endif %}
+
+    {% if item.media.URL %}
+    <div>
+        <a href="{{item.media.URL}}" target="_blank">{{item.media.URL}}</a>
+    </div>
+    {% endif %}
+
+    {% if item.media.alt_text %}
+    <div>{{item.media.alt_text}}</div>
+    {% endif %}
+</div>

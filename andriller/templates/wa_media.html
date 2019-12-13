@@ -1,0 +1,30 @@
+{% if item.thumb_image %}
+<div>
+    <img src="data:<MIMETYPE>;base64,{{item.raw_data}}"/>
+    {% if item.media_caption %}
+    <div>{{item.media_caption}}</div>
+    {% endif %}
+    <div style="font-family: monospace; font-size: smaller">
+        <div>
+            {% if item.media_mime_type %}Media Type: {{item.media_mime_type}}{% endif %}
+        </div>
+        <div>
+            {% if item.file_path %}Path: {{item.file_path}}{% endif %}
+        </div>
+        <div>
+            {% if item.media_url %}URL:
+            {{item.media_url}}{% endif %}
+        </div>
+        <div>
+            {% if item.file_size %}Size: {{item.file_size}}{% endif %}
+        </div>
+    </div>
+    <div>
+        {% if item.latitude %}
+        <a href="https://maps.google.com/maps?q={{item.latitude}},{{item.longitude}}" target="_blank">
+            Map Location: {{item.latitude}},{{item.longitude}}
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

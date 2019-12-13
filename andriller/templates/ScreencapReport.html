@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Screen Capture{% endblock title %}
+
+{% block content %}
+<h3 align="center">Screen Capture</h3>
+<table class="table table-striped">
+    <tr>
+        <th>#</th>
+        <th>Screen Shot</th>
+        <th>Notes</th>
+    </tr>
+    {% for i in items %}
+    <tr>
+        <td>{{loop.index}}</td>
+        <td>
+            <img src="{{i[0]}}" alt="" height="400">
+        </td>
+        <td>{{i[1]}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock content %}

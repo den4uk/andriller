@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td nowrap="nowrap">{{item._id|default(loop.index, true)}}</td>
+        <td>
+            <div>
+                <a href="{{item.sender_info.img_lrg}}" target="_blank">
+                    <img src="{{item.sender_info.img_sml}}" height="50">
+                </a>
+            </div>
+        </td>
+        <td nowrap="nowrap">
+            <div title="{{item.sender.user_key}}">
+                <a href="https://www.facebook.com/app_scoped_user_id/{{item.user_id}}" target="_blank">
+                    {{item.sender|default('', true)}}
+                </a>
+            </div>
+        </td>
+        <td>
+            {{item.text|default('', true)|e|nl2br}}
+            {% include 'fb_attach.html' %}
+            {% include 'fb_share.html' %}
+            {% include 'fb_sticker.html' %}
+        </td>
+        <td nowrap="nowrap">{% include 'fb_rcpt.html' %}</td>
+        <td nowrap="nowrap">{{item.timestamp|default('', true)}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

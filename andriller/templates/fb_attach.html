@@ -1,0 +1,22 @@
+{% for att in item.attachments %}
+<div style="border-radius:30px; border: 1px solid #C0C0C0; padding:20px">
+    <strong>Attachment</strong>
+    {% if att.urls %}
+    <div>
+        <a href="{{att.urls.LARGE_PREVIEW.src}}" target="_blank">
+            <img src="{{att.urls.SMALL_PREVIEW.src}}" height="150">
+        </a>
+    </div>
+    {% endif %}
+    {% if att.video_data_url %}
+    <div>
+        <video src="{{att.video_data_url}}" height="150" controls>
+            <source type="{{att.mime_type}}">
+            Your browser does not support the video tag!
+        </video>
+    </div>
+    {% endif %}
+    <div>Type: {{att.mime_type}}</div>
+    <div>File Name: {{att.filename}}</div>
+</div>
+{% endfor %}

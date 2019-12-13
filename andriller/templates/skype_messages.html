@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td nowrap="nowrap">{{item._id|default(loop.index, true)}}</td>
+        <td nowrap="nowrap">
+            {{item.sender.first_name|default('', true)}} {{item.sender.last_name|default('', true)}} ({{item.sender.skype_name|default('', true)}})
+        </td>
+        <td nowrap="nowrap">
+            {{item.conversation.first_name|default('', true)}} {{item.conversation.last_name|default('', true)}} ({{item.conversation.skype_name|default('', true)}})
+        </td>
+        <td>{{item.content|default('', true)|e|nl2br}}</td>
+        <td nowrap="nowrap">{{item.direction|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.time|default('', true)}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

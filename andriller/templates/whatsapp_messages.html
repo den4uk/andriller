@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}}{% endblock title %}
+
+{% block content %}
+
+<h3>{{title}}</h3>
+
+<p>Total: {{DATA|length}}</p>
+
+<table class="table table-striped">
+    <tr>
+        {% for title in Titles %}
+        <th>{{title}}</th>
+        {% endfor %}
+    </tr>
+    {% for item in DATA %}
+    <tr>
+        <td>{{item._id|default(loop.index, true)}}</td>
+        <td>{{item.sender|default('', true)}}</td>
+        <td>{% if item.recipients|length == 1 %}
+            {{item.recipients[0]}}
+            {% else %}
+            <details>
+                <summary>{{item.chat}}</summary>
+                {{'<br/>'.join(item.recipients)}}
+            </details>
+            {% endif %}
+        </td>
+        <td>
+            <!-- {{item.data|default('', true)|e}} -->
+            {{item.data|default('', true)|e|nl2br}}
+            {% include 'wa_media.html' %}
+        </td>
+        <td>{{item.type|default('', true)}}</td>
+        <td nowrap="nowrap">{{item.timestamp|default('', true)}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

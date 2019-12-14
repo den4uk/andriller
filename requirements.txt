@@ -1,8 +1,8 @@
-dateutils==0.6.6
+dateutils==0.6.7
 javaobj-py3==0.2.4
-pycryptodome==3.8.2
+pycryptodome==3.9.4
 python-dateutil==2.8.0
-XlsxWriter==1.1.8
-Jinja2==2.10.1
+XlsxWriter==1.2.6
+Jinja2==2.10.3
 timeout-decorator==0.4.1
 appdirs==1.4.3

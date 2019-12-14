@@ -3,10 +3,10 @@ language: python
 python:
   - "3.6"
   - "3.7"
+  - "3.8"
 install:
   - pip install pip -U
-  - pip install pytest-cov flake8
-  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
 script:
   - flake8 --ignore=E128,E501,E731 --statistics andriller/
   - pytest --cov=andriller tests/

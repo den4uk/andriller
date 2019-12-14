@@ -23,25 +23,25 @@ Andriller - is software utility with a collection of forensic tools for smartpho
 - 3.6+
 
 
-## Dependencies
+## System Dependencies
 - `adb`
 - `python3-tk`
 
-Install from Terminal (Debian based):
+Install from Terminal (Ubuntu/Debian based):
 ```bash
 $ sudo apt-get install android-tools-adb python3-tk
+```
+
+
+## Installation (from PYPI, recommended)
+```bash
+$ pip install andriller -U
 ```
 
 
 ## Installation (from source, editable)
 ```bash
 $ pip install -e .
-```
-
-
-## Installation (from PYPI)
-```bash
-$ pip install andriller -U
 ```
 
 

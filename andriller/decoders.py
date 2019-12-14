@@ -6,7 +6,7 @@ import pathlib
 import itertools
 import collections
 from . import utils
-from .DecoderClass import AndroidDecoder
+from .classes import AndroidDecoder
 
 logger = logging.getLogger(__name__)
 javaobj._log.level = logging.WARNING

@@ -2,7 +2,7 @@ import os
 import pytest
 import hashlib
 import tempfile
-from andriller.DecoderClass import AndroidDecoder, DecoderError
+from andriller.classes import AndroidDecoder, DecoderError
 from .test_config import c
 
 

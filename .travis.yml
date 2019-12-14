@@ -1,22 +1,22 @@
-dist: xenial   # required for Python >= 3.7
+dist: xenial
 language: python
 python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
+- '3.6'
+- '3.7'
+- '3.8'
 install:
-  - pip install pip -U
-  - pip install -r requirements-dev.txt
+- pip install pip -U
+- pip install -r requirements-dev.txt
 script:
-  - flake8 --ignore=E128,E501,E731 --statistics andriller/
-  - pytest --cov=andriller tests/
+- flake8 --ignore=E128,E501,E731 --statistics andriller/
+- pytest --cov=andriller tests/
 deploy:
   provider: pypi
   user: denco
   password:
-    secure: hNOvn3E5OOlXu4qeGi5Ge9gPzOVzVdtPvSXLWtS6nG1X2cFAxpijuyaAvJyEa7ebpGmd1Rf1ri6QU3oQCGmKH+xogkRce3roPHxd/DzEx6S8GbQEfhFp1xTV5Qd5R08J1/oOuRlQ8gzKTmvtYn2G6kM8oXPIMfcVhuDvG9JUdxjT2YimhJ/p3slys4ezn/EK5KqFFcI8p3vf/180/SKRUKlUO6WSHf2VHNFjKYwGgvgojUQT4hc4Xk76t4cXsSdciBsAiu+9u7cd6vNyRh72B8YgMwHKO7v46+5ViCZrxSOiLTe5UCYq9csCMDiTbXDq8Pg1nOpHjJEhv08TL8r2WXnqxQLbaBpWX1V+6bva438r4KwcYG8hQBsAKqub6+Qzn6gBYqj036MlF/7IP0QsqXRumOgv+Y34JCrBR8RSA2xqJxxQ42LHD3T3OrF0hmeQ+B5W0iipOJ0VdLRlCndHCHSAa2WOtH5MuCV7NWfXX4O+uxKu7HUjtnI546v6i1oXf3iySDpoeixJm6H4n82g5f3R/TGA0icPGfsVXmdynZDiMMwatrKc+vu/DJ4WPu8mo5U+OMYah07WdURfq9zkyC8ZWSgGb+L2wiPh+gbNcCINZIGmV1eDXjrfMZ5jmJDQkMxCyX8PANqRlxmYJuQ5gyHrz+uQt85JHqgTil3G/rg=
+    secure: WK43G6u49vfxqeKvrs97MAjX2xeNKTNx5zn1Xv0LADPxQLsdmgOISSxJKQZqtExaoS32JwUuLZ5hVadbl4FEhN16bG4+iYEQlrmNzyASLJdfN2svX5Cxb36wzrQjJx1+kC5JTQLRzZxLFXlSaKVOqU+bJbvmkHlp/lIZ6nALUGYHQc72uYi4mQ7O11hxuUxbMV91YxiGxT/Em/Pe4n52lJesUlz7mfKsmCbmezIvWeGkTj5hjO91AZmdOT2jUjkmwWNjF4kbjqI2pSVFg8NinM4+Iet7M1vHk3c5awjEpKCFp8uwdgc6AB3KKcIQnXF9WfcNGpClKLlwDH+zesj2OSLRMtlS/uU8vV/txjjbcyCBsOyk+0fSguHAfUFsUrI/sm1lSUvrGL+/P6DdvFn9xjBNwvUI7e7iUrnGJ+bToKRXvD4QaoyQDOheIX6kyukVte37NC4msnR7YJRO8XSaUaISrT1pxceI1GEtpjOvxW0gHnB+Sjg6TtYrJ351xUzPEZ77Kx7r1tOCLCFBUH8rLk0gNIXGgofaVQO1RxIvrXvQUAuKIKzteEpx+MY7dWnAqWpdy2GHI9xVs7CG1HnWsvkTEBl05MhlivIaW2eHm1rsC41WAU1Ia/tksZyAxqxNcEXRZ5tUj/sKt6sjTuqxD6zHO4lS8AbMRwpZGA0Hg60=
   skip_existing: true
-  distributions: "bdist_wheel"
+  distributions: bdist_wheel
   on:
     branch: master
     tags: true

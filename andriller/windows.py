@@ -1232,7 +1232,8 @@ class ScreenCap(BaseWindow):
         self.save_this.pack(side=tk.TOP, expand=0, fill=tk.X)
         # Report
 
-        self.report_button = ttk.Button(assist_frame, textvar=self.REPCOUNT, command=self.report)
+        self.report_button = ttk.Button(assist_frame, textvar=self.REPCOUNT)
+        self.report_button.bind('<Button-1>', self.report)
         self.report_button.configure(state=tk.DISABLED)
         createToolTip(self.report_button, 'Generate a report with created screen captures.\nNote: only works when Output is provided.')
         self.report_button.pack(side=tk.TOP, expand=0, fill=tk.X)
@@ -1271,7 +1272,7 @@ class ScreenCap(BaseWindow):
     def display(self, img_obj):
         if not img_obj:
             messagebox.showwarning('Nothing to display', 'Nothing was captured. Is a device connected?')
-            return
+            return None
         self.save_this.configure(state=tk.NORMAL)
         self.screen_view.grid_forget()
         img_obj.seek(0)
@@ -1279,9 +1280,9 @@ class ScreenCap(BaseWindow):
         width, height = struct.unpack('>ii', head[16:24])
         factor = width // 200
         fname = os.path.realpath(img_obj.name)
-        currentImage = tk.PhotoImage(file=fname).subsample(factor, factor)
-        PIC = ttk.Label(self.snap_frame, image=currentImage)
-        PIC.grid(row=0, column=0, sticky=(tk.N, tk.W))
+        self.currentImage = tk.PhotoImage(file=fname).subsample(factor, factor)
+        self.PIC = ttk.Label(self.snap_frame, image=self.currentImage)
+        self.PIC.grid(row=0, column=0, sticky=(tk.N, tk.W))
         _note = self.note_text.get().rstrip()
         if _note:
             tk.Label(self.snap_frame, text=_note, font=self.FontInfo, bg='#FFFFFF').grid(row=0, column=0, sticky=(tk.S, tk.W))
@@ -1303,7 +1304,7 @@ class ScreenCap(BaseWindow):
                 self.REPCOUNT.set(f'Report ({self.store.count})')
             self.snap_button.configure(state=tk.NORMAL)
             self.status_label.configure(text='Ready')
-            self.display(img_obj)
+            return self.display(img_obj)
 
     def save(self):
         file_location = self.store.items[-1][0]
@@ -1314,15 +1315,14 @@ class ScreenCap(BaseWindow):
         if savefilename:
             shutil.copy2(file_location, savefilename)
 
-    @disable_control
-    def report(self):
-        # REP.configure(state=DISABLED)
-        if not self.store.count:
-            messagebox.showinfo('No Captures', "Nothing to report yet")
-            return
-        report = pathlib.Path(self.store.report())
-        webbrowser.open_new_tab(report.as_uri())
-        # REP.configure(state=NORMAL)
+    @threaded
+    def report(self, event=None):
+        with disable_control(event):
+            if not self.store.count:
+                messagebox.showinfo('No Captures', "Nothing to report yet")
+                return
+            report = pathlib.Path(self.store.report())
+            webbrowser.open_new_tab(report.as_uri())
 
 
 # Preferences -----------------------------------------------------------------

@@ -5,12 +5,16 @@ import hashlib
 import logging
 import binascii
 import itertools
+from dataclasses import dataclass
 from . import utils
 
 logger = logging.getLogger(__name__)
 
 
-def crack_pattern(pat):
+def crack_pattern(pat: str) -> list:
+    """
+    Simple gesture key cracker.
+    """
     patd = binascii.unhexlify(pat.strip())
     if patd == hashlib.sha1(b'').digest():
         return None
@@ -28,36 +32,28 @@ class PasswordCrackError(Exception):
     pass
 
 
+@dataclass
 class PasswordCrack:
-    def __init__(
-        self,
-        key,
-        salt,
-        start=0,
-        end=9999,
-        min_len=None,
-        max_len=None,
-        alpha=None,
-        dict_file=False,
-        alpha_range=None,
-        samsung=False,
-        update_rate=50000,
-    ):
-        self.start = start
-        self.end = end
-        self.min_len = min_len
-        self.max_len = max_len
-        self.key = self.get_hash(key)
-        self.salt = self.get_salt(salt)
-        self.alpha = alpha
-        self.alpha_range = alpha_range
-        self.dict_file = dict_file
-        self.samsung = samsung
+    key: str
+    salt: int
+    start: int = 0
+    end: int = 9999
+    min_len: int = None
+    max_len: int = None
+    alpha: bool = None
+    dict_file: str = False
+    alpha_range: str = None
+    samsung: bool = False
+    update_rate: int = 50000
+
+    def __post_init__(self):
+        self.key = self.get_hash(self.key)
+        self.salt = self.get_salt(self.salt)
         self.current = None
         self.tried = 0
         self.rate = 0
         self.total = 0
-        self.update_rate = (update_rate // 1024) if samsung else update_rate
+        self.update_rate = (self.update_rate // 1024) if self.samsung else self.update_rate
 
     @staticmethod
     def get_hash(key: str) -> bytes:
@@ -151,6 +147,7 @@ class PasswordCrack:
         if prog:
             self.total = self.get_total_combos()
         started = time.time()
+        n = 0
         for n, pin in enumerate(feed, start=1):
             if not n % self.update_rate and tk_obj:
                 self.set_rate(rate, n, started)
@@ -162,4 +159,4 @@ class PasswordCrack:
             if algo(pin) == self.key:
                 self.set_tried(tried, n)
                 return pin.decode()
-        self.set_tried(tried, tried)
+        self.set_tried(tried, n)

@@ -17,6 +17,14 @@ SQLITE_MAGIC = b'SQLite format 3\x00'
 
 
 class AndroidDecoder:
+    """
+    Main decoder class for Android databases. It's subclasses are also used in the Registry.
+    TARGET (str): database name, eg: 'my_database.db'
+    RETARGET (str): a regex-like string, where the database name is not static, eg: 'store_91237635238734535.db'
+    NAMESPACE (str): package namespace options are: db|r|f|sp; 'db' is for 'databases', 'sp' is for 'shared_preferences', etc.
+    PACKAGE (str): package name for the application, eg: 'my_app.example.com'
+    EXTRAS (List[str]): extra support files needed for decoding.
+    """
     TARGET = None
     RETARGET = None
     NAMESPACE = None  # db|r|f|sp
@@ -27,12 +35,17 @@ class AndroidDecoder:
     exclude_from_decoding = False  # For ambitious target names (eg: '*.db')
 
     def __init__(self, work_dir, input_file, stage=False, **kwargs):
+        """
+        Contructor options:
+        work_dir (str|Path): directory where to output reports.
+        input_file (str|Path): input file (as intended self.TARGET) locally on the system.
+        stage (bool): if True, the decoder will initialise but won't run decoding.
+        """
         self.work_dir = work_dir
         self.input_file = input_file
         self.title = None
         self.Titles = {}  # {<key for XLSX>: <Title name for HTML>}
         self.template_name = None  # HTML template
-        # self.conf = config.Config()
         self.logger = kwargs.get('logger', logger)
         if not stage:
             self.logger.debug(f'decoder:{type(self).__name__}')

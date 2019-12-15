@@ -879,7 +879,8 @@ class BrutePattern(BaseWindow):
 
 # Generic PIN Cracking Window -------------------------------------------------
 class LockscreenBase(BaseWindow):
-    def __init__(self, root=None, title=None):
+    def __init__(self, root=None, title=None, logger=logger):
+        self.logger = logger
         super().__init__(root=root, title=title)
 
         ttk.Label(self.mainframe, font=self.FontTitle, text=f'\n{title}\n').grid(row=1, column=0, columnspan=3)
@@ -1117,6 +1118,7 @@ class LockscreenBase(BaseWindow):
                 self.result_field.configure(foreground='black')
                 self.RESULT.set('Stopped!' if self.STOP.get() else 'Not found!')
         except Exception as err:
+            self.logger.exception('Error in password cracking.')
             messagebox.showwarning('Error', str(err))
         finally:
             self.STOP.set(0)

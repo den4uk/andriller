@@ -17,12 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 def placebo(*args, **kwargs):
+    """
+    Decorator that decorates nothing (used to replace real ones where functionality is not possible).
+    """
     def decorate(function):
         return function
     return decorate
 
 
 def threaded(method):
+    """
+    Send the function to be executed on a separate thread rather than the main thread.
+    To be used inside a class only.
+    If NOTHREAD is found in environment variables, defaults to the main thread.
+    """
     if os.environ.get('NOTHREAD'):
         return method
 
@@ -50,6 +58,9 @@ def human_bytes(size):
 
 
 def totupe(ver: str) -> tuple:
+    """
+    Converts a semantic version to a tuple, eg: '1.2.3' -> (1, 2, 3)
+    """
     res = re.match(r'^(?:\d\.?)+', ver.strip()).group()
     return tuple(map(int, res.split('.')))
 

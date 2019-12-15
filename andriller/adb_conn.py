@@ -16,6 +16,11 @@ startupinfo = None
 
 
 class ADBConn:
+    """
+    Class for all adb (android debugging bridge communications).
+    For Windows, binary files are supplied.
+    For Mac/Linux, install binaries via brew/apt/pacman.
+    """
     UNIX = ['linux', 'linux2', 'darwin']
     MODES = {
         'download': 'download',
@@ -26,6 +31,10 @@ class ADBConn:
     }
 
     def __init__(self, logger=logger, log_level=logging.INFO):
+        """
+        logger: optional, pass a dedicated loggger instance, else default will be used.
+        log_level: optional, logging level.
+        """
         self.adb_bin = None
         self.platform = sys.platform
         self.rmr = b'\r\n'
@@ -61,7 +70,18 @@ class ADBConn:
         return opt
 
     @timeout(60 * 60 * 2, use_signals=False)
-    def adb(self, cmd, binary=False, su=False, **kwargs):
+    def adb(self, cmd, binary=False, su=False, **kwargs) -> str:
+        """
+        Runs an adb command and returns the output as a string.
+
+        Args:
+            cmd (str): adb command.
+            binary (bool): returns bytes output instead of str.
+            su (bool): use superuser if the target device has it.
+
+        Example:
+            to run `adb shell id` do: self.adb('shell id')
+        """
         if isinstance(cmd, str):
             cmd = shlex.split(cmd)
         if su:
@@ -115,17 +135,36 @@ class ADBConn:
         if re.match(self._file_regex(file_path), file_remote):
             return file_remote
 
-    def get_file(self, file_path, **kwargs):
+    def get_file(self, file_path, **kwargs) -> bytes:
+        """
+        Returns binary content of a file.
+
+        Args:
+            file_path (str|Path): Remote file path.
+        """
         file_path_strict = self.strict_name(file_path)
         data = self.adb(f'shell cat {file_path_strict}', binary=True, **kwargs)
         return data
 
     def pull_file(self, file_path, dst_path, **kwargs):
+        """
+        Uses pull command to copy a file.
+
+        Args:
+            file_path (str|Path): Remote file path.
+            dst_path (str|Path): Local file path where to save.
+        """
         file_path_strict = re.sub(' ', r'\ ', file_path)
         dst_path_strict = re.sub(' ', r'\ ', dst_path)
         self.adb(f"pull {file_path_strict} {dst_path_strict}")
 
-    def get_size(self, file_path, **kwargs):
+    def get_size(self, file_path, **kwargs) -> int:
+        """
+        Returns remote file size in bytes.
+
+        Args:
+            file_path (str|Path): Remote file path.
+        """
         file_path_strict = self.strict_name(file_path)
         size = self.adb(f'shell stat -c %s {file_path_strict}', **kwargs)
         if not size.isdigit():

@@ -27,9 +27,14 @@ Andriller - is software utility with a collection of forensic tools for smartpho
 - `adb`
 - `python3-tk`
 
-Install from Terminal (Ubuntu/Debian based):
+[Ubuntu/Debian] Install from Terminal:
 ```bash
 $ sudo apt-get install android-tools-adb python3-tk
+```
+
+[Mac] Install from brew cask:
+```bash
+$ brew cask install android-platform-tools
 ```
 
 
@@ -53,3 +58,17 @@ $ python -m andriller
 
 ## License
 MIT License
+
+
+## Contrinuting
+Contributions are welcome, please make your pull requests to the `dev` branch of the repository.
+
+
+## Bug Tracker
+Bugs and issues can be submitted in the ([Issues](https://github.com/den4uk/andriller/issues)) section.
+
+
+## Donations
+You may make donations to the projects, or you can also just _buy me a beer_:
+
+[![Donate](https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=\_s-xclick&hosted\_button\_id=8AHFL65LMTLLE&source=url)

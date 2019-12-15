@@ -1,5 +1,4 @@
 -r requirements.txt
 -e .
-wheel
 flake8
 pytest-cov

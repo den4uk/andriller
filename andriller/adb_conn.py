@@ -93,9 +93,10 @@ class ADBConn:
                 return self.unstrip(run.stdout)
             return run.stdout.decode().strip()
 
-    def adb_iter(self, cmd):
+    @staticmethod
+    def cmditer(cmd):
         process = subprocess.Popen(
-            [self.adb_bin] + shlex.split(cmd),
+            shlex.split(cmd),
             shell=False,
             startupinfo=startupinfo,
             stdout=subprocess.PIPE)

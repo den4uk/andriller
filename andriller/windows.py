@@ -300,6 +300,7 @@ class MainWindow(BaseWindow):
         logger.info(f"Detected/PC time: {self.time_now_local}")
         logger.info(f"Universal time:   {self.time_now_utc}")
         logger.info(f"Time in reports:  {self.time_now_configured} <--")  # \u2190
+        self.conf.check_latest_version(logger=self.logger)
 
         # Setup ADB
         # def setup_adb(self):
@@ -377,6 +378,8 @@ class MainWindow(BaseWindow):
         menu_help = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(menu=menu_help, label='Help', underline=0)
         menu_help.add_command(label='Visit website')
+        menu_help.add_separator()
+        menu_help.add_command(label='Run Update', command=lambda: self.conf.upgrade_package(logger=self.logger))
         menu_help.add_separator()
         menu_help.add_command(label='About', command=self.about_msg)
 

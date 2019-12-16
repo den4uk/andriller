@@ -8,3 +8,4 @@ Jinja2==2.10.3
 timeout-decorator==0.4.1
 appdirs==1.4.3
 dataclasses
+requests==2.22.0

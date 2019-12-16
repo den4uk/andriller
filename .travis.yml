@@ -1,15 +1,17 @@
 dist: xenial
 language: python
 python:
-- '3.6'
-- '3.7'
-- '3.8'
+  - '3.6'
+  - '3.7'
+  - '3.8'
 install:
-- pip install pip -U
-- pip install -r requirements-dev.txt
+  - pip install pip -U
+  - pip install -r requirements-dev.txt
+env:
+  - NOTHREAD=true
 script:
-- flake8 --ignore=E128,E501,E731 --statistics andriller/
-- pytest --cov=andriller tests/
+  - flake8 --ignore=E128,E501,E731 --statistics andriller/
+  - pytest --cov=andriller tests/
 deploy:
   provider: pypi
   user: denco

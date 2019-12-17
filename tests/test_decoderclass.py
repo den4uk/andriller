@@ -3,7 +3,7 @@ import pytest
 import hashlib
 import tempfile
 from andriller.classes import AndroidDecoder, DecoderError
-from .test_config import c
+from .test_config import conf
 
 
 class Decodr(AndroidDecoder):
@@ -29,7 +29,7 @@ class Decodr(AndroidDecoder):
 
 
 @pytest.fixture
-def Deco(c):
+def Deco(conf):
     work_dir = tempfile.NamedTemporaryFile()
     input_file = tempfile.TemporaryFile()
     dec = Decodr(work_dir.name, input_file.name)
@@ -37,8 +37,8 @@ def Deco(c):
 
 
 @pytest.fixture
-def DecoTZ(c):
-    c.update_conf(**{c.NS: {'time_zone': 'UTC-05:00'}})
+def DecoTZ(conf):
+    conf.update_conf(**{conf.NS: {'time_zone': 'UTC-05:00'}})
     work_dir = tempfile.NamedTemporaryFile()
     input_file = tempfile.TemporaryFile()
     dec = Decodr(work_dir.name, input_file.name)

@@ -300,6 +300,7 @@ class MainWindow(BaseWindow):
         logger.info(f"Detected/PC time: {self.time_now_local}")
         logger.info(f"Universal time:   {self.time_now_utc}")
         logger.info(f"Time in reports:  {self.time_now_configured} <--")  # \u2190
+        self.conf.check_latest_version(logger=self.logger)
 
         # Setup ADB
         # def setup_adb(self):
@@ -377,6 +378,8 @@ class MainWindow(BaseWindow):
         menu_help = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(menu=menu_help, label='Help', underline=0)
         menu_help.add_command(label='Visit website')
+        menu_help.add_separator()
+        menu_help.add_command(label='Run Update', command=lambda: self.conf.upgrade_package(logger=self.logger))
         menu_help.add_separator()
         menu_help.add_command(label='About', command=self.about_msg)
 
@@ -879,7 +882,8 @@ class BrutePattern(BaseWindow):
 
 # Generic PIN Cracking Window -------------------------------------------------
 class LockscreenBase(BaseWindow):
-    def __init__(self, root=None, title=None):
+    def __init__(self, root=None, title=None, logger=logger):
+        self.logger = logger
         super().__init__(root=root, title=title)
 
         ttk.Label(self.mainframe, font=self.FontTitle, text=f'\n{title}\n').grid(row=1, column=0, columnspan=3)
@@ -1117,6 +1121,7 @@ class LockscreenBase(BaseWindow):
                 self.result_field.configure(foreground='black')
                 self.RESULT.set('Stopped!' if self.STOP.get() else 'Not found!')
         except Exception as err:
+            self.logger.exception('Error in password cracking.')
             messagebox.showwarning('Error', str(err))
         finally:
             self.STOP.set(0)

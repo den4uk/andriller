@@ -1,4 +1,4 @@
-__version__ = '3.2.1'
+__version__ = '3.2.2'
 __app_name__ = 'Andriller CE'
 __package_name__ = 'andriller'
 __website__ = "https://github.com/den4uk/andriller"  # "https://www.andriller.com"

@@ -4,7 +4,9 @@ import time
 import logging
 import pathlib
 import datetime
+import requests
 import configparser
+from contextlib import suppress
 from appdirs import AppDirs
 from . import utils
 from . import statics
@@ -34,6 +36,7 @@ class Config:
         self.tzone = None
         self.date_format = None
         self.setup_tz()
+        self.update_available = False
 
     def __call__(self, key):
         return self.conf[self.NS][key]
@@ -102,3 +105,22 @@ class Config:
     @property
     def is_mac(self):
         return self.OS == 'darwin'
+
+    @utils.threaded
+    def check_latest_version(self, logger=logger):
+        url = f'https://pypi.org/pypi/{__package_name__}/json'
+        with suppress(Exception):
+            response = requests.get(url)
+            if response.ok and response.headers.get('Content-Type') == 'application/json':
+                latest = max(response.json()['releases'])
+                logger.debug(f'Fetched latest version from PYPI: {latest}')
+                if utils.totupe(__version__) < utils.totupe(latest):
+                    logger.warning(f'  ** Update available: {latest} **')
+                    self.update_available = True
+
+    @utils.threaded
+    def upgrade_package(self, package=__package_name__, logger=logger):
+        from .adb_conn import ADBConn
+        cmd = f'{sys.executable} -m pip install {package} -U'
+        for line in ADBConn.cmditer(cmd):
+            logger.info(line)

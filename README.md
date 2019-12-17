@@ -3,6 +3,7 @@ Andriller CE (Community Edition)
 [![Build Status](https://travis-ci.org/den4uk/andriller.svg?branch=master)](https://travis-ci.org/den4uk/andriller)
 [![License](https://img.shields.io/github/license/den4uk/andriller.svg)](https://pypi.python.org/pypi/andriller)
 [![PyPI Version](http://img.shields.io/pypi/v/andriller.svg)](https://pypi.python.org/pypi/andriller)
+![Twitter Follow](https://img.shields.io/twitter/follow/den4uk?style=social)
 
 Andriller - is software utility with a collection of forensic tools for smartphones. It performs read-only, forensically sound, non-destructive acquisition from Android devices. It has features, such as powerful Lockscreen cracking for Pattern, PIN code, or Password; custom decoders for Apps data from Android (some Apple iOS & Windows) databases for decoding communications. Extraction and decoders produce reports in HTML and Excel formats.
 
@@ -36,6 +37,8 @@ $ sudo apt-get install android-tools-adb python3-tk
 ```bash
 $ brew cask install android-platform-tools
 ```
+
+[Windows] : _Included._
 
 
 ## Installation (from PYPI, recommended)

@@ -21,7 +21,11 @@ Andriller - is software utility with a collection of forensic tools for smartpho
 
 
 ## Python Requirements
-- 3.6+
+- 3.6+ (64-bit version recommended)
+
+> It is highly advised to setup a virtual environment to install Andriller and its dependencies in it. However, it is not essential, and the global environment can also be used. Depending on how Python was setup, it may be needed to substitute `python` and `pip` to `python3` and `pip3` retrospectively for the instructions below.
+
+> Windows only: when installing Python from [https://www.python.org](https://www.python.org), make sure **Add Python to PATH** is ticked.
 
 
 ## System Dependencies
@@ -63,7 +67,7 @@ $ python -m andriller
 MIT License
 
 
-## Contrinuting
+## Contributing
 Contributions are welcome, please make your pull requests to the `dev` branch of the repository.
 
 

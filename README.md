@@ -45,7 +45,18 @@ $ brew cask install android-platform-tools
 [Windows] : _Included._
 
 
-## Installation (from PYPI, recommended)
+## Installation (Recommended way)
+Create a virtual environment using Python 3:
+```bash
+$ python3 -venv env
+```
+
+Activate the virtual environment:
+```bash
+$ source env/bin/activate
+```
+
+Install Andriller with its Python dependencies (same command to upgrade it):
 ```bash
 $ pip install andriller -U
 ```

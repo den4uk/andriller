@@ -48,7 +48,7 @@ $ brew cask install android-platform-tools
 ## Installation (Recommended way)
 Create a virtual environment using Python 3:
 ```bash
-$ python3 -venv env
+$ python3 -m venv env
 ```
 
 Activate the virtual environment:
@@ -58,19 +58,13 @@ $ source env/bin/activate
 
 Install Andriller with its Python dependencies (same command to upgrade it):
 ```bash
-$ pip install andriller -U
-```
-
-
-## Installation (from source, editable)
-```bash
-$ pip install -e .
+(env) $ pip install andriller -U
 ```
 
 
 ## Quick Start (run GUI)
 ```bash
-$ python -m andriller
+(env) $ python -m andriller
 ```
 
 

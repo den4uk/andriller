@@ -133,6 +133,8 @@ class ADBConn:
     def exists(self, file_path, **kwargs):
         file_path_strict = self.strict_name(file_path)
         file_remote = self.adb(f'shell ls {file_path_strict}', **kwargs)
+        if not file_remote:
+            return None
         if re.match(self._file_regex(file_path), file_remote):
             return file_remote
 

@@ -12,8 +12,6 @@ from .config import CODEPATH  # noqa
 
 logger = logging.getLogger(__name__)
 
-startupinfo = None
-
 
 class ADBConn:
     """
@@ -35,6 +33,7 @@ class ADBConn:
         logger: optional, pass a dedicated loggger instance, else default will be used.
         log_level: optional, logging level.
         """
+        self.startupinfo = None
         self.adb_bin = None
         self.platform = sys.platform
         self.rmr = b'\r\n'
@@ -55,14 +54,13 @@ class ADBConn:
             raise ADBConnError('ADB binary is not found!')
 
     def _win_startupinfo(self):
-        global startupinfo
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        self.startupinfo = subprocess.STARTUPINFO()
+        self.startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         self.rmr = b'\r\r\n'
 
     @property
     def run_opt(self):
-        opt = {'shell': False, 'startupinfo': startupinfo}
+        opt = {'shell': False, 'startupinfo': self.startupinfo}
         if tuple(sys.version_info) >= (3, 7):
             opt['capture_output'] = True
         else:
@@ -90,15 +88,14 @@ class ADBConn:
         run = subprocess.run([self.adb_bin] + cmd, **self.run_opt)
         if run.stdout and run.returncode == 0:
             if binary:
-                return self.unstrip(run.stdout)
+                return run.stdout
             return run.stdout.decode().strip()
 
-    @staticmethod
-    def cmditer(cmd):
+    def cmditer(self, cmd):
         process = subprocess.Popen(
             shlex.split(cmd),
             shell=False,
-            startupinfo=startupinfo,
+            startupinfo=self.startupinfo,
             stdout=subprocess.PIPE)
         while True:
             output = process.stdout.readline()
@@ -133,6 +130,8 @@ class ADBConn:
     def exists(self, file_path, **kwargs):
         file_path_strict = self.strict_name(file_path)
         file_remote = self.adb(f'shell ls {file_path_strict}', **kwargs)
+        if not file_remote:
+            return None
         if re.match(self._file_regex(file_path), file_remote):
             return file_remote
 
@@ -144,7 +143,7 @@ class ADBConn:
             file_path (str|Path): Remote file path.
         """
         file_path_strict = self.strict_name(file_path)
-        data = self.adb(f'shell cat {file_path_strict}', binary=True, **kwargs)
+        data = self.adb(f'exec-out cat {file_path_strict}', binary=True, **kwargs)
         return data
 
     def pull_file(self, file_path, dst_path, **kwargs):
@@ -186,9 +185,6 @@ class ADBConn:
         else:
             if run.stdout:
                 return run.stdout.decode().strip()
-
-    def unstrip(self, data: bytes):
-        return re.sub(self.rmr, b'\n', data)
 
     def reboot(self, mode=None):
         mode = self.MODES.get(mode, '')

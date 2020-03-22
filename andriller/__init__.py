@@ -4,6 +4,7 @@ __package_name__ = 'andriller'
 __website__ = "https://github.com/den4uk/andriller"  # "https://www.andriller.com"
 __license__ = 'MIT'
 
+import os
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ def run():
     parser = argparse.ArgumentParser(description='Andriller execution with CLI options.')
     parser.add_argument("-d", "--debug", dest='debug', action='store_true', help="Run with log level set to debug.")
     parser.add_argument("-f", "--file", help="Save log to a file, use with --debug flag.")
+    parser.add_argument("--nothread", dest='nothread', action='store_true', help="Disable threading on GUI.")
     parser.add_argument("-v", "--version", dest='version', action='store_true', help="Show the version.")
     parser.set_defaults(debug=False, file=None, version=None)
     args = parser.parse_args()
@@ -29,6 +31,10 @@ def run():
     # Log to file
     if args.file:
         logging.basicConfig(filename=args.file, filemode='a', level=level)
+
+    # No thread
+    if args.nothread:
+        os.environ['NOTHREAD'] = '1'
 
     # Run main App
     from . import windows

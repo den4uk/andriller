@@ -4,7 +4,7 @@ import pathlib
 import hashlib
 from contextlib import suppress
 from dataclasses import dataclass
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 from .utils import threaded
 
 

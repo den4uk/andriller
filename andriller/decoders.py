@@ -9,7 +9,7 @@ from . import utils
 from .classes import AndroidDecoder
 
 logger = logging.getLogger(__name__)
-javaobj._log.level = logging.WARNING
+javaobj.utils._log.level = logging.WARNING
 
 
 # -----------------------------------------------------------------------------

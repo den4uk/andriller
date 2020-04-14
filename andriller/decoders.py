@@ -291,6 +291,7 @@ class SamsungCallsDecoder(GenericCallsDecoder):
             i['duration'] = self.duration(i['duration'])
             self.DATA.append(i)
 
+
 # -----------------------------------------------------------------------------
 class AndroidOneCallsDecoder(GenericCallsDecoder):
     TARGET = 'calllog.db'
@@ -309,6 +310,7 @@ class AndroidOneCallsDecoder(GenericCallsDecoder):
             i['date'] = self.unix_to_time_ms(i['date'])
             i['duration'] = self.duration(i['duration'])
             self.DATA.append(i)
+
 
 # -----------------------------------------------------------------------------
 class SamsungSnippetsDecoder(AndroidDecoder):

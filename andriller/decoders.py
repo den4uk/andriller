@@ -291,6 +291,24 @@ class SamsungCallsDecoder(GenericCallsDecoder):
             i['duration'] = self.duration(i['duration'])
             self.DATA.append(i)
 
+# -----------------------------------------------------------------------------
+class AndroidOneCallsDecoder(GenericCallsDecoder):
+    TARGET = 'calllog.db'
+    NAMESPACE = 'db'
+    PACKAGE = 'com.android.providers.contacts'
+
+    def __init__(self, work_dir, input_file, **kwargs):
+        super().__init__(work_dir, input_file, **kwargs)
+        self.title = 'Android One Call Logs'
+
+    def main(self):
+        table = 'calls'
+        for i in self.sql_table_as_dict(table, order_by='date'):
+            i['type'] = self.call_type(i['type'])
+            i['number'] = self.parse_number(i['number'])
+            i['date'] = self.unix_to_time_ms(i['date'])
+            i['duration'] = self.duration(i['duration'])
+            self.DATA.append(i)
 
 # -----------------------------------------------------------------------------
 class SamsungSnippetsDecoder(AndroidDecoder):

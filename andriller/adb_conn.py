@@ -1,6 +1,7 @@
 import re
 import sys
 import shlex
+import atexit
 import os.path
 import logging
 import subprocess
@@ -38,6 +39,7 @@ class ADBConn:
         self.platform = sys.platform
         self.rmr = b'\r\n'
         self.setup(log_level)
+        atexit.register(self.kill)
 
     def setup(self, log_level):
         self.logger = logger

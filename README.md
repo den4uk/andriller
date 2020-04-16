@@ -51,9 +51,14 @@ Create a virtual environment using Python 3:
 $ python3 -m venv env
 ```
 
-Activate the virtual environment:
+Activate the virtual environment (Linux/Mac):
 ```bash
 $ source env/bin/activate
+```
+
+Activate the virtual environment (Windows):
+```ps1
+> .\env\Scripts\activate
 ```
 
 Install Andriller with its Python dependencies (same command to upgrade it):

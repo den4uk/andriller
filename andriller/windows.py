@@ -379,8 +379,9 @@ class MainWindow(BaseWindow):
         self.menubar.add_cascade(menu=menu_help, label='Help', underline=0)
         menu_help.add_command(label='Visit website')
         menu_help.add_separator()
-        menu_help.add_command(label='Run Update', command=lambda: self.conf.upgrade_package(logger=self.logger))
-        menu_help.add_separator()
+        if getattr(sys, 'frozen', False):
+            menu_help.add_command(label='Run Update', command=lambda: self.conf.upgrade_package(logger=self.logger))
+            menu_help.add_separator()
         menu_help.add_command(label='About', command=self.about_msg)
 
     def build_adb_menus(self):

@@ -1191,11 +1191,10 @@ class Registry:
         self.populate()
 
     def populate(self):
-        for obj in globals().values():
-            if type(obj) == type and issubclass(obj, AndroidDecoder) and obj != AndroidDecoder:
-                if obj.exclude_from_registry:
-                    continue
-                self.decoders[obj] = pathlib.PurePosixPath(obj.RETARGET or obj.TARGET)
+        for obj in AndroidDecoder.get_subclasses():
+            if obj.exclude_from_registry:
+                continue
+            self.decoders[obj] = pathlib.PurePosixPath(obj.RETARGET or obj.TARGET)
 
     def has_target(self, target_file):
         target = pathlib.PurePosixPath(target_file)
@@ -1260,6 +1259,6 @@ class Registry:
 # -----------------------------------------------------------------------------
 def parse_lockscreen_wal(file_path) -> tuple:
     with open(file_path, 'rb') as R:
-        re_res = re.findall(b'_salt(\-?\d+)', R.read(), re.DOTALL)  # noqa: W605
+        re_res = re.findall(rb'_salt(\-?\d+)', R.read(), re.DOTALL)  # noqa: W605
         return tuple(set(map(int, re_res)))
     return tuple()

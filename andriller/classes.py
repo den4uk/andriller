@@ -355,6 +355,13 @@ class AndroidDecoder:
             if attr in attrib and value in attrib.values():
                 return t.text
 
+    @classmethod
+    def get_subclasses(cls):
+        for sub in cls.__subclasses__():
+            for ssub in sub.get_subclasses():
+                yield ssub
+            yield sub
+
 
 # -----------------------------------------------------------------------------
 class DecoderError(Exception):

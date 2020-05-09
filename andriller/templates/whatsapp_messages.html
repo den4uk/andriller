@@ -9,11 +9,7 @@
 <p>Total: {{DATA|length}}</p>
 
 <table class="table table-striped">
-    <tr>
-        {% for title in Titles %}
-        <th>{{title}}</th>
-        {% endfor %}
-    </tr>
+    {% include '_headers.html' %}
     {% for item in DATA %}
     <tr>
         <td>{{item._id|default(loop.index, true)}}</td>

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 SQLITE_MAGIC = b'SQLite format 3\x00'
 
 
-class AndroidDecoder:
+class AndroidDecoder(abc.ABC):
     """
     Main decoder class for Android databases. It's subclasses are also used in the Registry.
     TARGET (str): database name, eg: 'my_database.db'
@@ -33,6 +33,10 @@ class AndroidDecoder:
     exclude_from_menus = False
     exclude_from_registry = False
     exclude_from_decoding = False  # For ambitious target names (eg: '*.db')
+    target_is_db = None
+    title = None
+    template_name = None  # HTML template
+    headers = {}  # {<key for XLSX>: <Title name for HTML>}
 
     def __init__(self, work_dir, input_file, stage=False, **kwargs):
         """
@@ -43,9 +47,6 @@ class AndroidDecoder:
         """
         self.work_dir = work_dir
         self.input_file = input_file
-        self.title = None
-        self.Titles = {}  # {<key for XLSX>: <Title name for HTML>}
-        self.template_name = None  # HTML template
         self.logger = kwargs.get('logger', logger)
         if not stage:
             self.logger.debug(f'decoder:{type(self).__name__}')
@@ -60,11 +61,13 @@ class AndroidDecoder:
             self._conf = config.Config()
         return self._conf
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def main(self):
-        # Make the magic happen here
-        # populate `self.DATA` list with decoded objects
-        pass
+        """
+        Make the magic happen here
+        populate `self.DATA` list with decoded objects
+        """
+        raise NotImplementedError  # noqa
 
     @property
     def target_path_ab(self):
@@ -97,7 +100,7 @@ class AndroidDecoder:
     def get_artifact(self, path_property):
         # Pass path property, such as `self.root_path` or `self.ab_path`
         SQLITE_SUFFIXES = ['', '-shm', '-wal', '-journal']
-        if self.NAMESPACE == 'db' or getattr(self, 'target_is_db', False):
+        if self.NAMESPACE == 'db' or self.target_is_db:
             return [f'{path_property}{suf}' for suf in SQLITE_SUFFIXES]
         return [path_property]
 
@@ -211,7 +214,7 @@ class AndroidDecoder:
             W.write(template.render(
                 DATA=self.DATA,
                 title=self.title,
-                Titles=self.Titles.values(),
+                headers=self.headers.values(),
                 **self.get_head_foot()))
         return os.path.relpath(report_file, self.work_dir)
 
@@ -220,7 +223,7 @@ class AndroidDecoder:
             to_close = True
             workbook = engines.Workbook(self.work_dir, self.title)
         sheet = workbook.add_sheet(self.title)
-        col_vals, col_names = zip(*self.Titles.items())
+        col_vals, col_names = zip(*self.headers.items())
         workbook.write_header(sheet, col_names)
         for row, data in enumerate(self.DATA, start=1):
             data['_id'] = data.get('_id', row)

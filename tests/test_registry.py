@@ -18,12 +18,12 @@ def test_find_decoders_by_file_name(registry, file_name, result):
 
 
 def test_ab_links(registry):
-    links = registry.get_ab_links
+    links = registry.get_ab_links()
     p = 'apps/com.whatsapp/db/wa.db'
     assert p in links
 
 
 def test_root_links(registry):
-    links = registry.get_root_links
+    links = registry.get_root_links()
     p = '/data/data/com.whatsapp/databases/wa.db'
     assert p in links

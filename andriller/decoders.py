@@ -5,6 +5,7 @@ import logging
 import pathlib
 import itertools
 import collections
+from dataclasses import dataclass, field
 from . import utils
 from .classes import AndroidDecoder
 
@@ -18,10 +19,7 @@ class SettingsDecoder(AndroidDecoder):
     NAMESPACE = 'db'
     PACKAGE = 'com.android.providers.settings'
     exclude_from_menus = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        # TODO: template
+    # TODO: template
 
     def main(self):
         table = 'secure'
@@ -46,8 +44,8 @@ class LocksettingsDecoder(AndroidDecoder):
     target_is_db = True
     exclude_from_menus = True
 
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
+    target_path_root = f'/data/system/{TARGET}'
+    target_path_posix = f'system/{TARGET}'
 
     def main(self):
         table = 'locksettings'
@@ -55,59 +53,44 @@ class LocksettingsDecoder(AndroidDecoder):
             *[self.name_val(d) for d in self.sql_table_as_dict(table)])
         # self.DATA = list(self.DICT)
 
-    @property
-    def target_path_root(self):
-        return f'/data/system/{self.TARGET}'
-
-    @property
-    def target_path_posix(self):
-        return f'system/{self.TARGET}'
-
 
 # -----------------------------------------------------------------------------
 class AccountsDecoder(AndroidDecoder):
     TARGET = 'accounts.db'
     target_is_db = True
+    template_name = 'accounts.html'
+    title = 'Accounts (System)'
+    headers = {
+        '_id': 'Index',
+        'type': 'Account type',
+        'name': 'Username',
+        'password': 'Password',
+    }
 
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'accounts.html'
-        self.title = 'Accounts (System)'
-        self.Titles = {
-            '_id': 'Index',
-            'type': 'Account type',
-            'name': 'Username',
-            'password': 'Password',
-        }
+    target_path_root = f'/data/system/users/0/{TARGET}'
+    target_path_posix = f'system/users/0/{TARGET}'
 
     def main(self):
         table = 'accounts'
         self.DATA = list(self.sql_table_as_dict(table))
 
-    @property
-    def target_path_root(self):
-        return f'/data/system/users/0/{self.TARGET}'
-
-    @property
-    def target_path_posix(self):
-        return f'system/users/0/{self.TARGET}'
-
 
 # -----------------------------------------------------------------------------
 class WifiPasswordsDecoder(AndroidDecoder):
     TARGET = 'wpa_supplicant.conf'
+    template_name = 'wifi_passwords.html'
+    title = 'Wi-Fi Passwords'
+    headers = {
+        '_id': 'Index',
+        'ssid': 'SSID',
+        'psk': 'Password',
+        'key_mgmt': 'Key Management',
+        'priority': 'Priority',
+    }
 
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'wifi_passwords.html'
-        self.title = 'Wi-Fi Passwords'
-        self.Titles = {
-            '_id': 'Index',
-            'ssid': 'SSID',
-            'psk': 'Password',
-            'key_mgmt': 'Key Management',
-            'priority': 'Priority',
-        }
+    target_path_root = f'/data/misc/wifi/{TARGET}'
+    target_path_ab = f'apps/com.android.providers.settings/f/{TARGET}'
+    target_path_posix = f'/data/misc/wifi/{TARGET}'
 
     def parse_wifi(self, rec: bytes) -> dict:
         d = self.to_chars(rec).split('\n\t')
@@ -121,18 +104,6 @@ class WifiPasswordsDecoder(AndroidDecoder):
             for hit in rex.findall(R.read()):
                 self.DATA.append(self.parse_wifi(hit))
 
-    @property
-    def target_path_root(self):
-        return f'/data/misc/wifi/{self.TARGET}'
-
-    @property
-    def target_path_ab(self):
-        return f'apps/com.android.providers.settings/f/{self.TARGET}'
-
-    @property
-    def target_path_posix(self):
-        return f'/data/misc/wifi/{self.TARGET}'
-
 
 class WifiPasswordsAbDecoder(WifiPasswordsDecoder):
     TARGET = 'flattened-data'
@@ -144,17 +115,14 @@ class WebViewDecoder(AndroidDecoder):
     TARGET = 'webview.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.browser'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'web_passwords.html'
-        self.title = 'WebView Browser Passwords'
-        self.Titles = {
-            '_id': 'Index',
-            'host': 'Host',
-            'username': 'Username',
-            'password': 'Password',
-        }
+    template_name = 'web_passwords.html'
+    title = 'WebView Browser Passwords'
+    headers = {
+        '_id': 'Index',
+        'host': 'Host',
+        'username': 'Username',
+        'password': 'Password',
+    }
 
     def main(self):
         self.DATA = [*self.sql_table_as_dict('password')]
@@ -165,18 +133,15 @@ class BrowserHistoryDecoder(AndroidDecoder):
     TARGET = 'browser2.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.browser'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'web_history.html'
-        self.title = 'Android Browser History'
-        self.Titles = {
-            'id': 'Index',
-            'title': 'Page title',
-            'url': 'URL',
-            'date': 'Last Time Visited',
-            'visits': 'Frequency',
-        }
+    template_name = 'web_history.html'
+    title = 'Android Browser History'
+    headers = {
+        'id': 'Index',
+        'title': 'Page title',
+        'url': 'URL',
+        'date': 'Last Time Visited',
+        'visits': 'Frequency',
+    }
 
     def main(self):
         table = 'history'
@@ -192,10 +157,7 @@ class ChromeHistoryDecoder(BrowserHistoryDecoder):
     NAMESPACE = 'app_chrome/Default'
     PACKAGE = 'com.android.chrome'
     target_is_db = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'Google Chrome History'
+    title = 'Google Chrome History'
 
     def main(self):
         table = 'urls'
@@ -211,18 +173,15 @@ class ChromePasswordsDecoder(AndroidDecoder):
     NAMESPACE = 'app_chrome/Default'
     PACKAGE = 'com.android.chrome'
     target_is_db = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'chrome_passwords.html'
-        self.title = 'Google Chrome Passwords'
-        self.Titles = {
-            '_id': 'Index',
-            'origin_url': 'URL',
-            'username_value': 'Username',
-            'password_value': 'Password',
-            'date_created': 'Date created',
-        }
+    template_name = 'chrome_passwords.html'
+    title = 'Google Chrome Passwords'
+    headers = {
+        '_id': 'Index',
+        'origin_url': 'URL',
+        'username_value': 'Username',
+        'password_value': 'Password',
+        'date_created': 'Date created',
+    }
 
     def main(self):
         table = 'logins'
@@ -236,10 +195,7 @@ class ChromePasswordsDecoder(AndroidDecoder):
 class ChromeArchivedHistoryDecoder(ChromeHistoryDecoder):
     TARGET = 'Archived History'
     exclude_from_menus = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'Google Chrome Archived History'
+    title = 'Google Chrome Archived History'
 
 
 # -----------------------------------------------------------------------------
@@ -247,19 +203,16 @@ class GenericCallsDecoder(AndroidDecoder):
     TARGET = 'contacts2.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.providers.contacts'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'call_logs.html'
-        self.title = 'Call Logs'
-        self.Titles = {
-            '_id': 'Index',
-            'type': 'Type',
-            'number': 'Number',
-            'name': 'Name',
-            'date': 'Time',
-            'duration': 'Duration',
-        }
+    template_name = 'call_logs.html'
+    title = 'Call Logs'
+    headers = {
+        '_id': 'Index',
+        'type': 'Type',
+        'number': 'Number',
+        'name': 'Name',
+        'date': 'Time',
+        'duration': 'Duration',
+    }
 
     def main(self):
         table = 'calls'
@@ -276,10 +229,7 @@ class SamsungCallsDecoder(GenericCallsDecoder):
     TARGET = 'logs.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.sec.android.provider.logsprovider'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'Samsung Call Logs'
+    title = 'Samsung Call Logs'
 
     def main(self):
         table = 'logs'
@@ -297,19 +247,7 @@ class AndroidOneCallsDecoder(GenericCallsDecoder):
     TARGET = 'calllog.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.providers.contacts'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'Android One Call Logs'
-
-    def main(self):
-        table = 'calls'
-        for i in self.sql_table_as_dict(table, order_by='date'):
-            i['type'] = self.call_type(i['type'])
-            i['number'] = self.parse_number(i['number'])
-            i['date'] = self.unix_to_time_ms(i['date'])
-            i['duration'] = self.duration(i['duration'])
-            self.DATA.append(i)
+    title = 'Android One Call Logs'
 
 
 # -----------------------------------------------------------------------------
@@ -317,19 +255,16 @@ class SamsungSnippetsDecoder(AndroidDecoder):
     TARGET = 'logs.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.sec.android.provider.logsprovider'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'samsung_snippets.html'
-        self.title = 'Samsung SMS Snippets'
-        self.Titles = {
-            '_id': 'Index',
-            'number': 'Number',
-            'name': 'Name',
-            'm_content': 'Snippet',
-            'type': 'Type',
-            'date': 'Time',
-        }
+    template_name = 'samsung_snippets.html'
+    title = 'Samsung SMS Snippets'
+    headers = {
+        '_id': 'Index',
+        'number': 'Number',
+        'name': 'Name',
+        'm_content': 'Snippet',
+        'type': 'Type',
+        'date': 'Time',
+    }
 
     def main(self):
         table = 'logs'
@@ -346,18 +281,15 @@ class SMSMMSDecoder(AndroidDecoder):
     TARGET = 'mmssms.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.providers.telephony'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'sms_messages.html'
-        self.title = 'SMS Messages'
-        self.Titles = {
-            '_id': 'Index',
-            'address': 'Number',
-            'body': 'Message',
-            'date': 'Time',
-            'type': 'Type'
-        }
+    template_name = 'sms_messages.html'
+    title = 'SMS Messages'
+    headers = {
+        '_id': 'Index',
+        'address': 'Number',
+        'body': 'Message',
+        'date': 'Time',
+        'type': 'Type'
+    }
 
     def main(self):
         table = 'sms'
@@ -373,17 +305,14 @@ class WhatsAppContactsDecoder(AndroidDecoder):
     TARGET = 'wa.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.whatsapp'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'whatsapp_contacts.html'
-        self.title = 'WhatsApp Contacts'
-        self.Titles = {
-            '_id': 'Index',
-            'display_name': 'Name',
-            'number': 'Number',
-            'status': 'Status',
-        }
+    template_name = 'whatsapp_contacts.html'
+    title = 'WhatsApp Contacts'
+    headers = {
+        '_id': 'Index',
+        'display_name': 'Name',
+        'number': 'Number',
+        'status': 'Status',
+    }
 
     def main(self):
         table = 'wa_contacts'
@@ -401,11 +330,7 @@ class WhatsAppCallsDecoder(GenericCallsDecoder):
     TARGET = 'msgstore.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.whatsapp'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'WhatsApp Calls'
-        # _id, key_remote_jid, timestamp, key_from_me, media_duration
+    title = 'WhatsApp Calls'
 
     @staticmethod
     def num(jid):
@@ -439,22 +364,19 @@ class WhatsAppMessagesDecoder(AndroidDecoder):
     TARGET = 'msgstore.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.whatsapp'
+    template_name = 'whatsapp_messages.html'
+    title = 'WhatsApp Messages'
+    headers = {
+        '_id': 'Index',
+        'sender': 'Sender',
+        'x_recipients': 'Recipient(s)',
+        'x_message': 'Message',
+        'type': 'Type',
+        'timestamp': 'Time',
+    }
 
     def __init__(self, work_dir, input_file, **kwargs):
-        self.owner = '(This device)'
-        self.parts = collections.defaultdict(list)
-        self.thumbs = {}
         super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'whatsapp_messages.html'
-        self.title = 'WhatsApp Messages'
-        self.Titles = {
-            '_id': 'Index',
-            'sender': 'Sender',
-            'x_recipients': 'Recipient(s)',
-            'x_message': 'Message',
-            'type': 'Type',
-            'timestamp': 'Time',
-        }
         self.add_extra('sp', 'com.whatsapp_preferences.xml')
         self.add_extra('f', 'key')
 
@@ -503,6 +425,7 @@ class WhatsAppMessagesDecoder(AndroidDecoder):
                 where={'!subject': ''},)}
 
     def populate_owner(self):
+        self.owner = '(This device)'
         prefs = self.get_neighbour('com.whatsapp_preferences.xml')
         if prefs:
             owner_num = self.xml_get_tag_text(prefs, 'string', 'name', 'registration_jid')
@@ -511,10 +434,12 @@ class WhatsAppMessagesDecoder(AndroidDecoder):
 
     def populate_parts(self):
         # TODO: 'group_patricipants_history' table
+        self.parts = collections.defaultdict(list)
         for g, j in self.sql_table_rows('group_participants', columns=('gjid', 'jid')):
             self.parts[g].append(self.num(j) if j else self.owner)
 
     def populate_broadcast(self):
+        self.thumbs = {}
         for d in self.sql_table_as_dict('message_thumbnails'):
             self.thumbs[d['key_id']] = d['thumbnail']
 
@@ -550,19 +475,19 @@ class KikMessagesDecoder(AndroidDecoder):
     RETARGET = '*.kikDatabase.db'
     NAMESPACE = 'db'
     PACKAGE = 'kik.android'
+    template_name = 'kik_messages.html'
+    title = 'Kik Messages'
+    headers = {
+        '_id': 'Index',
+        'partner_jid': 'User ID',
+        'display_name': 'Display Name',
+        'body': 'Message',
+        'type': 'Type',
+        'timestamp': 'Time',
+    }
 
     def __init__(self, work_dir, input_file, **kwargs):
         super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'kik_messages.html'
-        self.title = 'Kik Messages'
-        self.Titles = {
-            '_id': 'Index',
-            'partner_jid': 'User ID',
-            'display_name': 'Display Name',
-            'body': 'Message',
-            'type': 'Type',
-            'timestamp': 'Time',
-        }
         self.add_extra('sp', '*.KikPreferences.xml')
 
     def main(self):
@@ -587,6 +512,16 @@ class FacebookMessagesDecoder(AndroidDecoder):
     NAMESPACE = 'db'
     PACKAGE = 'com.facebook.orca'
     target_is_db = True
+    template_name = 'facebook_messages.html'
+    title = 'Facebook Messenger'
+    headers = {
+        '_id': 'Index',
+        'sender': 'Sender',
+        'user_key': 'Sender Account',
+        'x_text': 'Message',
+        'x_recipients': 'Recipients',
+        'timestamp': 'Time',
+    }
 
     def __init__(self, work_dir, input_file, **kwargs):
         self.parts = collections.defaultdict(list)
@@ -594,16 +529,6 @@ class FacebookMessagesDecoder(AndroidDecoder):
         self.stickers = {}
         self.sql_tables = []
         super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'facebook_messages.html'
-        self.title = 'Facebook Messenger'
-        self.Titles = {
-            '_id': 'Index',
-            'sender': 'Sender',
-            'user_key': 'Sender Account',
-            'x_text': 'Message',
-            'x_recipients': 'Recipients',
-            'timestamp': 'Time',
-        }
         self.add_extra('db', 'stickers_db')
         self.add_extra('db', 'stickers_db-journal')
 
@@ -703,10 +628,7 @@ class FacebookMessagesDecoder(AndroidDecoder):
 class FacebookMessagesLiteDecoder(FacebookMessagesDecoder):
     TARGET = 'core.db'
     PACKAGE = 'com.facebook.mlite'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'Facebook Messenger Lite'
+    title = 'Facebook Messenger Lite'
 
     @staticmethod
     def user_info(d):
@@ -755,23 +677,20 @@ class SkypeMessagesLegacyDecoder(AndroidDecoder):
     TARGET = 'main.db'
     NAMESPACE = 'files/*'  # * = <account_name>
     PACKAGE = 'com.skype.raider'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        self.convos = {}
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'skype_messages_legacy.html'
-        self.title = 'Skype Messages (Legacy)'
-        self.Titles = {
-            'id': 'Index',
-            'identity': 'Skype ID',
-            'from_dispname': 'Name',
-            'body_xml': 'Message',
-            'chatmsg_status': 'Status',
-            'type': 'Type',
-            'timestamp': 'Time',
-        }
+    template_name = 'skype_messages_legacy.html'
+    title = 'Skype Messages (Legacy)'
+    headers = {
+        'id': 'Index',
+        'identity': 'Skype ID',
+        'from_dispname': 'Name',
+        'body_xml': 'Message',
+        'chatmsg_status': 'Status',
+        'type': 'Type',
+        'timestamp': 'Time',
+    }
 
     def process_convos(self):
+        self.convos = {}
         for c in self.sql_table_as_dict('Conversations'):
             self.convos[c['id']] = c['identity']
 
@@ -795,30 +714,27 @@ class SkypeMessagesDecoder(AndroidDecoder):
     NAMESPACE = 'db'
     PACKAGE = 'com.skype.raider'
     exclude_from_decoding = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        self.owner = None
-        self.owners = {}
-        self.users = {}
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'skype_messages.html'
-        self.title = 'Skype Messages'
-        self.Titles = {
-            '_id': 'Index',
-            'x_sender': 'Sender',
-            'x_conversation': 'Conversation',
-            'content': 'Content',
-            'direction': 'Direction',
-            'time': 'Time',
-        }
+    template_name = 'skype_messages.html'
+    title = 'Skype Messages'
+    headers = {
+        '_id': 'Index',
+        'x_sender': 'Sender',
+        'x_conversation': 'Conversation',
+        'content': 'Content',
+        'direction': 'Direction',
+        'time': 'Time',
+    }
 
     def set_owner(self):
+        self.owner = None
+        self.owners = {}
         users = list(self.sql_table_as_dict('user'))
         if users:
             self.owners = {u['entry_id']: u for u in users}
             self.owner = users[0].get('entry_id')
 
     def populate_users(self):
+        self.users = {}
         for u in self.sql_table_as_dict('person'):
             self.users[u['entry_id']] = u
 
@@ -854,19 +770,16 @@ class SkypeMessagesDecoder(AndroidDecoder):
 
 # -----------------------------------------------------------------------------
 class SkypeCallsDecoder(SkypeMessagesDecoder):
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'skype_calls.html'
-        self.title = 'Skype Calls'
-        self.Titles = {
-            '_id': 'Index',
-            'type': 'Type',
-            'x_sender': 'Caller',
-            'x_conversation': 'Conversation',
-            'time': 'Time',
-            'duration': 'Duration',
-        }
+    template_name = 'skype_calls.html'
+    title = 'Skype Calls'
+    headers = {
+        '_id': 'Index',
+        'type': 'Type',
+        'x_sender': 'Caller',
+        'x_conversation': 'Conversation',
+        'time': 'Time',
+        'duration': 'Duration',
+    }
 
     def main(self):
         self.set_owner()
@@ -892,24 +805,20 @@ class ViberMessagesDecoder(AndroidDecoder):
     NAMESPACE = 'db'
     PACKAGE = 'com.viber.voip'
     target_is_db = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        self.parts = {}
-        self.convo = collections.defaultdict(list)
-        # self.tables = []
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'viber_messages.html'
-        self.title = 'Viber Messages'
-        self.Titles = {
-            '_id': 'Index',
-            'x_sender': 'Sender',
-            'x_recipients': 'Recipient(s)',
-            'body': 'Message',
-            'send_type': 'Type',
-            'msg_date': 'Time'
-        }
+    template_name = 'viber_messages.html'
+    title = 'Viber Messages'
+    headers = {
+        '_id': 'Index',
+        'x_sender': 'Sender',
+        'x_recipients': 'Recipient(s)',
+        'body': 'Message',
+        'send_type': 'Type',
+        'msg_date': 'Time'
+    }
 
     def populate_parts(self):
+        self.parts = {}
+        self.convo = collections.defaultdict(list)
         parts_info = {d['_id']: d for d in self.sql_table_as_dict('participants_info')}
         for p in self.sql_table_as_dict('participants'):
             p_obj = parts_info.get(p['participant_info_id'], {})
@@ -957,20 +866,17 @@ class ViberContactsDecoder(AndroidDecoder):
     NAMESPACE = 'db'
     PACKAGE = 'com.viber.voip'
     target_is_db = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        self.pbook = {}
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'viber_contacts.html'
-        self.title = 'Viber Contacts'
-        self.Titles = {
-            '_id': 'Index',
-            'display_name': 'Name',
-            'number': 'Number',
-            'starred': 'Starred',
-        }
+    template_name = 'viber_contacts.html'
+    title = 'Viber Contacts'
+    headers = {
+        '_id': 'Index',
+        'display_name': 'Name',
+        'number': 'Number',
+        'starred': 'Starred',
+    }
 
     def populate_pbook(self):
+        self.pbook = {}
         for p in self.sql_table_as_dict('phonebookdata'):
             self.pbook[p['contact_id']] = p
 
@@ -994,10 +900,7 @@ class ViberCallsDecoder(GenericCallsDecoder):
     NAMESPACE = 'db'
     PACKAGE = 'com.viber.voip'
     target_is_db = True
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.title = 'Viber Calls'
+    title = 'Viber Calls'
 
     def main(self):
         table = 'calls'
@@ -1016,20 +919,17 @@ class DownloadsDecoder(AndroidDecoder):
     TARGET = 'downloads.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.providers.downloads'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'downloads.html'
-        self.title = 'Download History'
-        self.Titles = {
-            '_id': 'Index',
-            'uri': 'URL',
-            '_data': 'Saved Data',
-            'notificationpackage': 'Requesting App',
-            'total_size': 'Size',
-            'status': 'Status',
-            'lastmod': 'Time',
-        }
+    template_name = 'downloads.html'
+    title = 'Download History'
+    headers = {
+        '_id': 'Index',
+        'uri': 'URL',
+        '_data': 'Saved Data',
+        'notificationpackage': 'Requesting App',
+        'total_size': 'Size',
+        'status': 'Status',
+        'lastmod': 'Time',
+    }
 
     def main(self):
         table = 'downloads'
@@ -1046,24 +946,21 @@ class AndroidCalendarDecoder(AndroidDecoder):
     TARGET = 'calendar.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.android.providers.calendar'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        self.accounts = {}
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'calendar.html'
-        self.title = 'Android Calendar'
-        self.Titles = {
-            '_id': 'Index',
-            'title': 'Title',
-            'eventLocation': 'Location',
-            'description': 'Description',
-            'lastDate': 'Time',
-            'dtstart': 'Start',
-            'dtend': 'End',
-            'account': 'Account'
-        }
+    template_name = 'calendar.html'
+    title = 'Android Calendar'
+    headers = {
+        '_id': 'Index',
+        'title': 'Title',
+        'eventLocation': 'Location',
+        'description': 'Description',
+        'lastDate': 'Time',
+        'dtstart': 'Start',
+        'dtend': 'End',
+        'account': 'Account'
+    }
 
     def populate_accounts(self):
+        self.accounts = {}
         for a in self.sql_table_as_dict('Calendars'):
             self.accounts[a['_id']] = f"{a['account_name']} ({a['name']})"
 
@@ -1089,23 +986,20 @@ class GooglePhotosDecoder(AndroidDecoder):
     RETARGET = 'gphotos*.db'
     NAMESPACE = 'db'
     PACKAGE = 'com.google.android.apps.photos'
-
-    def __init__(self, work_dir, input_file, **kwargs):
-        self.local = {}
-        super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'google_photos.html'
-        self.title = 'Google Photos'
-        self.Titles = {
-            '_id': 'Index',
-            'filename': 'File Name',
-            'capture_timestamp': 'Capture Time',
-            'lat_lon': 'GPS Coordinates',
-            'camera': 'Camera',
-            'local': 'Local Storage',
-            'remote_url': 'Remote Link'
-        }
+    template_name = 'google_photos.html'
+    title = 'Google Photos'
+    headers = {
+        '_id': 'Index',
+        'filename': 'File Name',
+        'capture_timestamp': 'Capture Time',
+        'lat_lon': 'GPS Coordinates',
+        'camera': 'Camera',
+        'local': 'Local Storage',
+        'remote_url': 'Remote Link'
+    }
 
     def populate_local(self):
+        self.local = {}
         for x in self.sql_table_as_dict('local_media'):
             self.local[x['dedup_key']] = x
 
@@ -1147,12 +1041,12 @@ class GooglePhotosDecoder(AndroidDecoder):
 #     TARGET = 'my.db'
 #     NAMESPACE = 'db'
 #     PACKAGE = 'com.myapp'
+#     template_name = ''
+#     title = ''
+#     headers = {}
 
 #     def __init__(self, work_dir, input_file, **kwargs):
 #         super().__init__(work_dir, input_file, **kwargs)
-#         self.template_name = ''
-#         self.title = ''
-#         self.Titles = {}
 #         self.add_extra('f', 'some.xml')
 
 #     def main(self):
@@ -1170,20 +1064,20 @@ class SharedFilesystemDecoder(AndroidDecoder):
     exclude_from_menus = True
     exclude_from_registry = True
     exp_match = r'^shared/\d/'
+    template_name = 'shared_storage.html'
+    title = 'Shared Storage'
+    headers = {
+        '_id': 'Index',
+        'directory': 'Directory',
+        'fname': 'Filename',
+        'size': 'Size',
+        'mtime': 'Modified',
+    }
 
     def __init__(self, work_dir, input_file, **kwargs):
         self.tools = utils.DrillerTools()
         self.match = kwargs.get('match', self.exp_match)
         super().__init__(work_dir, input_file, **kwargs)
-        self.template_name = 'shared_storage.html'
-        self.title = 'Shared Storage'
-        self.Titles = {
-            '_id': 'Index',
-            'directory': 'Directory',
-            'fname': 'Filename',
-            'size': 'Size',
-            'mtime': 'Modified',
-        }
 
     def process_ab(self):
         self.tar_file = self.tools.ab_to_tar(self.input_file)
@@ -1205,9 +1099,11 @@ class SharedFilesystemDecoder(AndroidDecoder):
 
 
 # -----------------------------------------------------------------------------
+@dataclass
 class Registry:
-    def __init__(self):
-        self.decoders = {}
+    decoders: dict = field(default_factory=dict)
+
+    def __post_init__(self):
         self.populate()
 
     def populate(self):
@@ -1236,7 +1132,6 @@ class Registry:
     # def decoders_package(self, package):
     #     return list(filter(lambda x: x.PACKAGE == package, self.decoders))
 
-    @property
     def get_root_links(self):
         root_links = []
         for dec in self.decoders:
@@ -1247,7 +1142,6 @@ class Registry:
                     root_links.append(dec.get_extras())
         return sorted(set(itertools.chain(*root_links)))
 
-    @property
     def get_ab_links(self):
         ab_links = []
         for dec in self.decoders:
@@ -1258,7 +1152,6 @@ class Registry:
                     ab_links.append(dec.get_extras(is_ab=True))
         return sorted(set(itertools.chain(*ab_links)))
 
-    @property
     def get_posix_links(self):
         posix_links = []
         for dec in self.decoders:
@@ -1271,8 +1164,8 @@ class Registry:
 
     @property
     def get_all_links(self):
-        all_links = self.get_root_links
-        all_links.extend(self.get_ab_links)
+        all_links = self.get_root_links()
+        all_links.extend(self.get_ab_links())
         return all_links
 
 

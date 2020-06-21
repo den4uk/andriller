@@ -1,11 +1,11 @@
 wheel
 dateutils==0.6.7
-javaobj-py3==0.4.0.1
+javaobj-py3==0.4.1
 pycryptodomex==3.9.7
 python-dateutil==2.8.0
-XlsxWriter==1.2.6
-Jinja2==2.10.3
+XlsxWriter==1.2.8
+Jinja2==2.11.2
 timeout-decorator==0.4.1
 appdirs==1.4.3
-dataclasses
-requests==2.22.0
+requests==2.23.0
+dataclasses>=0.7;python_version=="3.6"

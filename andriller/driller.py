@@ -264,7 +264,7 @@ class ChainExecution:
             self.DOWNLOADS.append(fn)
 
     def get_targets(self):
-        self.targets = [*map(pathlib.PurePath, self.registry.get_posix_links)]
+        self.targets = [*map(pathlib.PurePath, self.registry.get_posix_links())]
 
     def in_targets(self, target):
         if not self.targets:
@@ -304,7 +304,7 @@ class ChainExecution:
                 self.update('Acquiring shared storage...')
                 self.do_backup(ALL=False, shared=True, backup_name='shared.ab')
             self.update('Acquiring databases via root...')
-            for file_path in self.registry.get_root_links:
+            for file_path in self.registry.get_root_links():
                 self.download_file(file_path)
         elif run_backup or self.permisson == self.USER:
             self.do_backup(shared=shared)
@@ -317,7 +317,7 @@ class ChainExecution:
         if self.backup:
             self.AndroidBackupToTar()
         if self.tarfile:
-            targets = self.registry.get_all_links
+            targets = self.registry.get_all_links()
             # Perhaps change to posix links?
             self.ExtractFromTar(targets=targets)
         # if self.DataStore and self.DataStore.members:

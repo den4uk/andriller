@@ -293,7 +293,7 @@ class SMSMMSDecoder(AndroidDecoder):
 
     def main(self):
         table = 'sms'
-        for i in self.sql_table_as_dict(table, order_by=f'date'):
+        for i in self.sql_table_as_dict(table, order_by='date'):
             i['address'] = self.parse_number(i['address'])
             i['date'] = self.unix_to_time_ms(i['date'])
             i['type'] = self.sms_type(i['type'])

@@ -85,7 +85,7 @@ class ADBConn:
         if isinstance(cmd, str):
             cmd = shlex.split(cmd)
         if su:
-            cmd.insert(1, 'su -c')
+            cmd.insert(0, 'su -c')
         self.logger.debug(f'ADB: {cmd}')
         run = subprocess.run([self.adb_bin] + cmd, **self.run_opt)
         if run.stdout and run.returncode == 0:

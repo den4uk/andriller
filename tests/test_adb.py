@@ -1,7 +1,7 @@
+import sys
 import pytest
 import tempfile
 from unittest import mock
-# from pytest_mock import mocker
 from andriller import adb_conn
 
 fake_adb = tempfile.NamedTemporaryFile()
@@ -39,6 +39,7 @@ def test_file_regex(file_path, result):
     assert adb_conn.ADBConn._file_regex(file_path).match(result)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_adb_simple(ADB, mocker):
     output = mock.Mock(stdout=b'lala', returncode=0)
     mock_run = mocker.patch('andriller.adb_conn.subprocess.run', return_value=output)
@@ -49,6 +50,7 @@ def test_adb_simple(ADB, mocker):
         capture_output=True, shell=False, startupinfo=None)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_adb_simple_su(ADB, mocker):
     output = mock.Mock(stdout=b'lala', returncode=0)
     mock_run = mocker.patch('andriller.adb_conn.subprocess.run', return_value=output)
@@ -59,6 +61,7 @@ def test_adb_simple_su(ADB, mocker):
         capture_output=True, shell=False, startupinfo=None)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_adb_binary(ADB, mocker):
     output = mock.Mock(stdout=b'lala', returncode=0)
     mock_run = mocker.patch('andriller.adb_conn.subprocess.run', return_value=output)

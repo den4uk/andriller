@@ -13,3 +13,4 @@ htmlcov/
 .pytest_cache
 .vscode
 .idea
+*.code-workspace

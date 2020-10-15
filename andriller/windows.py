@@ -2,7 +2,6 @@
 
 import sys
 import json
-import glob
 import struct
 import string
 import shutil
@@ -613,7 +612,8 @@ class MainWindow(BaseWindow):
 # WhatsApp Crypt --------------------------------------------------------------
 class WhatsAppCrypt(BaseWindow):
     KEY_SIZE = decrypts.WhatsAppCrypt.KEY_SIZE
-    SUFFIX = decrypts.WhatsAppCrypt.SUFFIX
+    DECODED_DIR = decrypts.WhatsAppCrypt.DECODED_DIR
+    DECODED_EXT = decrypts.WhatsAppCrypt.DECODED_EXT
 
     def __init__(self, root=None, title='WhatsApp Crypt Decryptor'):
         super().__init__(root=root, title=title)
@@ -689,12 +689,12 @@ class WhatsAppCrypt(BaseWindow):
     def check_dir(self):
         self.crypts.clear()
         self.file_box.delete(*self.file_box.get_children())
-        path_ = os.path.join(self.work_dir, '*.crypt*')
-        for f in glob.iglob(path_):
-            done = os.path.exists(f'{os.path.splitext(f)[0]}{self.SUFFIX}')
+        path_ = pathlib.Path(self.work_dir)
+        for f in path_.glob('*.crypt*'):
+            done = f.parent.joinpath(self.DECODED_DIR, f'{f.name}{self.DECODED_EXT}').exists()
             size = human_bytes(os.path.getsize(f))
-            item = self.file_box.insert('', tk.END, text=os.path.basename(f), values=[size, done])
-            self.crypts[item] = f
+            item = self.file_box.insert('', tk.END, text=f.name, values=[size, done])
+            self.crypts[item] = str(f)
 
     def tree_update(self, iid, values):
         self.file_box.item(iid, values=values)
@@ -709,6 +709,7 @@ class WhatsAppCrypt(BaseWindow):
             messagebox.showwarning('No selection made', 'Select at least one database to decrypt.')
         self.run_decrypt(sel)
 
+    @threaded
     def run_decrypt(self, sel):
         try:
             self.controls_state(tk.DISABLED)
@@ -719,7 +720,10 @@ class WhatsAppCrypt(BaseWindow):
                 decrypter = self.supported.get(file_ext)
                 if decrypter:
                     try:
-                        wadec = decrypter(file_, self.key_file)
+                        wadec = decrypter(
+                            pathlib.Path(file_),
+                            pathlib.Path(self.key_file)
+                        )
                         if wadec.decrypt():
                             vals = self.file_box.item(i)['values']
                             vals[1] = True
@@ -730,7 +734,7 @@ class WhatsAppCrypt(BaseWindow):
                         self.file_box.item(i, tags='failure')
                         messagebox.showerror('WhatsApp decryption error', str(err))
                     except Exception as err:
-                        logger.error(f'WhatsAppCrypt: {fname}: {err}')
+                        logger.exception(f'WhatsAppCrypt: {fname}: {err}')
                         self.file_box.item(i, tags='failure')
         finally:
             self.file_box.selection_set()

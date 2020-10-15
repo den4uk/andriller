@@ -23,6 +23,9 @@ TIME_ZONES = {
 CODEPATH = pathlib.Path(__file__).absolute().parents[1] if \
     hasattr(sys, 'frozen') else pathlib.Path(__file__).absolute().parent
 
+SQLITE_MAGIC = b'SQLite format 3\x00'
+GZIP_MAGIC = b'\x1f\x8b\x08'
+
 
 class Config:
     NS = 'DEFAULT'

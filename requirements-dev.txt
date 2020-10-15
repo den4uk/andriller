@@ -2,3 +2,4 @@
 -e .
 flake8
 pytest-cov
+pytest_mock

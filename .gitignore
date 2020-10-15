@@ -13,3 +13,5 @@ htmlcov/
 .pytest_cache
 .vscode
 .idea
+*.code-workspace
+tests_live/

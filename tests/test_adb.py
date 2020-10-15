@@ -1,21 +1,25 @@
+import sys
 import pytest
 import tempfile
 from unittest import mock
 from andriller import adb_conn
 
-
 fake_adb = tempfile.NamedTemporaryFile()
 
 
 @pytest.fixture
-def ADB():
+def ADB(mocker):
+    mocker.patch('andriller.adb_conn.ADBConn.kill')
     with mock.patch('andriller.adb_conn.ADBConn.cmd_shell', return_value=fake_adb.name):
         adb = adb_conn.ADBConn()
+    adb_cmd = adb.adb.__func__.__wrapped__
+    setattr(adb, 'adb', lambda *args, **kwargs: adb_cmd(adb, *args, **kwargs))
     return adb
 
 
 @pytest.fixture
-def ADB_win():
+def ADB_win(mocker):
+    mocker.patch('andriller.adb_conn.ADBConn.kill')
     with mock.patch('sys.platform', return_value='win32'):
         adb = adb_conn.ADBConn()
     return adb
@@ -33,3 +37,36 @@ def test_init_windows(ADB_win):
 ])
 def test_file_regex(file_path, result):
     assert adb_conn.ADBConn._file_regex(file_path).match(result)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
+def test_adb_simple(ADB, mocker):
+    output = mock.Mock(stdout=b'lala', returncode=0)
+    mock_run = mocker.patch('andriller.adb_conn.subprocess.run', return_value=output)
+
+    res = ADB('hello')
+    assert res == 'lala'
+    mock_run.assert_called_with([fake_adb.name, 'hello'],
+        capture_output=True, shell=False, startupinfo=None)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
+def test_adb_simple_su(ADB, mocker):
+    output = mock.Mock(stdout=b'lala', returncode=0)
+    mock_run = mocker.patch('andriller.adb_conn.subprocess.run', return_value=output)
+
+    res = ADB('hello', su=True)
+    assert res == 'lala'
+    mock_run.assert_called_with([fake_adb.name, 'su -c', 'hello'],
+        capture_output=True, shell=False, startupinfo=None)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
+def test_adb_binary(ADB, mocker):
+    output = mock.Mock(stdout=b'lala', returncode=0)
+    mock_run = mocker.patch('andriller.adb_conn.subprocess.run', return_value=output)
+
+    res = ADB('hello', binary=True)
+    assert res == b'lala'
+    mock_run.assert_called_with([fake_adb.name, 'hello'],
+        capture_output=True, shell=False, startupinfo=None)

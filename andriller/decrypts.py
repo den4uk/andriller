@@ -5,7 +5,7 @@ import hashlib
 from contextlib import suppress
 from dataclasses import dataclass
 from Cryptodome.Cipher import AES
-from .utils import threaded
+from .config import SQLITE_MAGIC, GZIP_MAGIC
 
 
 @dataclass
@@ -14,12 +14,13 @@ class WhatsAppCrypt:
     key_file: pathlib.Path = None
     email: str = None
 
-    GZIP_MAGIC = b'\x1f\x8b\x08'
-    SQLITE_MAGIC = b'SQLite format 3\x00'
     KEY_SIZE = 158
-    SUFFIX = '.decoded.db'
+    DECODED_DIR = 'decoded'
+    DECODED_EXT = '.db'
 
     def __post_init__(self):
+        if not isinstance(self.input_file, pathlib.Path):
+            self.input_file = pathlib.Path(self.input_file)
         self.fname = self.input_file.name
         self.input_data = None
         self.KEY = None
@@ -27,9 +28,14 @@ class WhatsAppCrypt:
 
     @property
     def dst(self):
-        return self.input_file.with_suffix(self.SUFFIX)
+        dir_ = self.input_file.parent.joinpath(self.DECODED_DIR)
+        if not dir_.exists():
+            dir_.mkdir()
+        return dir_.joinpath(f'{self.input_file.name}{self.DECODED_EXT}')
 
     def get_key(self):
+        if not isinstance(self.key_file, pathlib.Path):
+            self.key_file = pathlib.Path(self.key_file)
         with self.key_file.open('rb') as R:
             self.KEY = R.read()[126:158]
 
@@ -105,12 +111,12 @@ class WhatsAppCrypt:
 
     @classmethod
     def check_is_sqlite(cls, data):
-        if not data.startswith(cls.SQLITE_MAGIC):
+        if not data.startswith(SQLITE_MAGIC):
             raise WhatsAppCryptError('Decryption failed (not sqlite).')
 
     @classmethod
     def check_is_gzip(cls, data):
-        if not data.startswith(cls.GZIP_MAGIC):
+        if not data.startswith(GZIP_MAGIC):
             raise WhatsAppCryptError('Decryption failed (not gzip).')
 
     def gzip_decompress(self, data):
@@ -122,7 +128,6 @@ class WhatsAppCrypt:
                 return gzip.decompress(data[:i])
         raise WhatsAppCryptError('Decompression failed')
 
-    @threaded
     def decrypt(self, **kwargs):
         # self.check_input_file_size(**kwargs)
         self.check_key_file_size()

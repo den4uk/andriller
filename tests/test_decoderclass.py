@@ -33,8 +33,8 @@ class Decodr(AndroidDecoder):
 
 @pytest.fixture
 def Deco(conf):
-    work_dir = tempfile.NamedTemporaryFile()
-    input_file = tempfile.TemporaryFile()
+    work_dir = tempfile.TemporaryDirectory()
+    input_file = tempfile.NamedTemporaryFile()
     dec = Decodr(work_dir.name, input_file.name)
     return dec
 
@@ -42,8 +42,8 @@ def Deco(conf):
 @pytest.fixture
 def DecoTZ(conf):
     conf.update_conf(**{conf.NS: {'time_zone': 'UTC-05:00'}})
-    work_dir = tempfile.NamedTemporaryFile()
-    input_file = tempfile.TemporaryFile()
+    work_dir = tempfile.TemporaryDirectory()
+    input_file = tempfile.NamedTemporaryFile()
     dec = Decodr(work_dir.name, input_file.name)
     return dec
 
@@ -55,6 +55,10 @@ def DecoFile(Deco):
     Deco.input_file = os.path.join(os.path.dirname(__file__),
         'data', 'other', 'locks', 'locksettings.db')
     return Deco
+
+
+def test_input_path_no_change(Deco):
+    assert Deco.input_file.endswith('some.xml') is False
 
 
 def test_paths(Deco):

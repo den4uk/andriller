@@ -147,7 +147,7 @@ class BrowserHistoryDecoder(AndroidDecoder):
         table = 'history'
         kw = {'order_by': 'date'}
         for i in self.sql_table_as_dict(table, **kw):
-            i['date'] = self.webkit_to_time(i['date'])
+            i['date'] = self.unix_to_time_ms(i['date'])
             self.DATA.append(i)
 
 
@@ -1162,7 +1162,6 @@ class Registry:
                     posix_links.append(dec.get_extras(is_posix=True))
         return sorted(set(itertools.chain(*posix_links)))
 
-    @property
     def get_all_links(self):
         all_links = self.get_root_links()
         all_links.extend(self.get_ab_links())

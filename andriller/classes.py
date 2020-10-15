@@ -1,22 +1,34 @@
 import os
 import re
-import abc
 import base64
 import logging
 import pathlib
 import sqlite3
 import datetime
+import functools
 import xml.etree.ElementTree
 from contextlib import suppress
 from . import config
 from . import engines
+from .config import SQLITE_MAGIC
 
 logger = logging.getLogger(__name__)
 
-SQLITE_MAGIC = b'SQLite format 3\x00'
+
+def sqlite_error_retry(method):
+    @functools.wraps(method)
+    def decorator(*args, **kwargs):
+        try:
+            return method(*args, **kwargs)
+        except sqlite3.OperationalError as err:
+            if 'UTF-8' in str(err):
+                return method(*args, **kwargs,
+                    cursor_kw={'text_factory': AndroidDecoder.decode_safe})
+            raise err
+    return decorator
 
 
-class AndroidDecoder(abc.ABC):
+class AndroidDecoder:
     """
     Main decoder class for Android databases. It's subclasses are also used in the Registry.
     TARGET (str): database name, eg: 'my_database.db'
@@ -61,13 +73,12 @@ class AndroidDecoder(abc.ABC):
             self._conf = config.Config()
         return self._conf
 
-    @abc.abstractmethod
     def main(self):
         """
         Make the magic happen here
         populate `self.DATA` list with decoded objects
         """
-        raise NotImplementedError  # noqa
+        pass
 
     @property
     def target_path_ab(self):
@@ -112,13 +123,12 @@ class AndroidDecoder(abc.ABC):
                 return neighbour
         return False
 
-    @classmethod
-    def add_extra(cls, namespace, target):
-        class Extra(cls):
+    def add_extra(self, namespace, target):
+        class Extra(AndroidDecoder):
             TARGET = target
             NAMESPACE = namespace
-            PACKAGE = cls.PACKAGE
-        cls.EXTRAS.append(Extra)
+            PACKAGE = self.PACKAGE
+        self.EXTRAS.append(Extra)
 
     def get_extras(self, **kwargs):
         return [self.gen_target_path(xtr, **kwargs) for xtr in self.EXTRAS]
@@ -132,6 +142,7 @@ class AndroidDecoder(abc.ABC):
         return cls(None, None, stage=True)
 
 # -----------------------------------------------------------------------------
+
     def check_sqlite_magic(self):
         if os.path.isfile(self.input_file):
             with open(self.input_file, 'rb') as R:
@@ -147,42 +158,47 @@ class AndroidDecoder(abc.ABC):
         input_file = pathlib.PurePath(os.path.abspath(self.input_file))
         return f'{input_file.as_uri()}?mode=ro'
 
-    def zipper(self, keys, values):
-        return {k: v for (k, v) in zip(keys, values)}
+    @staticmethod
+    def zipper(row: sqlite3.Row):
+        return dict(zip(row.keys(), row))
 
-    def get_sql_tables(self):
+    def get_cursor(self, row_factory=None, text_factory=None):
         with sqlite3.connect(self.sqlite_readonly, uri=True) as conn:
-            c = conn.cursor()
-            return tuple(x[0] for x in c.execute("SELECT name FROM sqlite_master WHERE type='table'"))
+            if row_factory:
+                conn.row_factory = row_factory
+            if text_factory:
+                conn.text_factory = text_factory
+            return conn.cursor()
 
-    def get_table_columns(self, table_name):
-        with sqlite3.connect(self.sqlite_readonly, uri=True) as conn:
-            c = conn.cursor()
-            return tuple(x[1] for x in c.execute(f"PRAGMA table_info({table_name})"))
+    def get_sql_tables(self, cursor_kw={}):
+        cur = self.get_cursor(**cursor_kw)
+        return tuple(x[0] for x in cur.execute("SELECT name FROM sqlite_master WHERE type='table'"))
 
-    def sql_table_as_dict(self, table, columns='*', order_by=None, order="DESC", where={}):
-        with sqlite3.connect(self.sqlite_readonly, uri=True) as conn:
-            conn.row_factory = sqlite3.Row
-            c = conn.cursor()
-            # table_names = tuple(x[1] for x in c.execute(f"PRAGMA table_info({table})"))
-            # if (order_by is not None) and (order_by not in table_names):
-            #     raise NameError(f"Column `{order_by}` is not in `{table}` table")
-            query = f"SELECT {','.join(columns)} FROM {table}"
-            if where:
-                query += f' WHERE {self.where(where)}'
-            if order_by:
-                query += f" ORDER BY {order_by} {order}"
-            self.logger.debug(f"SQL> {query}")
-            return (self.zipper(row.keys(), row) for row in c.execute(query))
+    def get_table_columns(self, table_name, cursor_kw={}):
+        cur = self.get_cursor(**cursor_kw)
+        return tuple(x[1] for x in cur.execute(f"PRAGMA table_info({table_name})"))
 
-    def sql_table_rows(self, table, columns='*', where={}):
-        with sqlite3.connect(self.sqlite_readonly, uri=True) as conn:
-            c = conn.cursor()
-            query = f"SELECT {','.join(columns)} FROM {table}"
-            if where:
-                query += f' WHERE {self.where(where)}'
-            self.logger.debug(f"SQL> {query}")
-            return c.execute(query)
+    @sqlite_error_retry
+    def sql_table_as_dict(self, table, columns='*', order_by=None, order="DESC", where={}, cursor_kw={}):
+        cur = self.get_cursor(row_factory=sqlite3.Row, **cursor_kw)
+        # table_names = tuple(x[1] for x in c.execute(f"PRAGMA table_info({table})"))
+        # if (order_by is not None) and (order_by not in table_names):
+        #     raise NameError(f"Column `{order_by}` is not in `{table}` table")
+        query = f"SELECT {','.join(columns)} FROM {table}"
+        if where:
+            query += f' WHERE {self.where(where)}'
+        if order_by:
+            query += f" ORDER BY {order_by} {order}"
+        self.logger.debug(f"SQL> {query}")
+        return [*map(self.zipper, cur.execute(query))]
+
+    def sql_table_rows(self, table, columns='*', where={}, cursor_kw={}):
+        cur = self.get_cursor(**cursor_kw)
+        query = f"SELECT {','.join(columns)} FROM {table}"
+        if where:
+            query += f' WHERE {self.where(where)}'
+        self.logger.debug(f"SQL> {query}")
+        return cur.execute(query).fetchall()
 
     @staticmethod
     def where(params: dict):
@@ -257,9 +273,16 @@ class AndroidDecoder(abc.ABC):
     def to_chars(data) -> str:
         if not data:
             return ''
+        if isinstance(data, bytes):
+            with suppress(Exception):
+                return data.decode('utf-8')
         if isinstance(data, str):
             data = data.encode()
         return ''.join(map(chr, data))
+
+    @staticmethod
+    def decode_safe(data: bytes) -> str:
+        return data.decode('utf-8', errors='ignore')
 
     @classmethod
     def safe_str(cls, value):
@@ -321,6 +344,9 @@ class AndroidDecoder(abc.ABC):
             192: 'Running',
             193: 'Paused',
             200: 'Success',
+            201: 'Created',
+            202: 'Accepted',
+            204: 'No Content',
             301: 'Redirected',
             302: 'Found',
             400: 'Bad Request',

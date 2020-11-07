@@ -1,7 +1,7 @@
 CHANGELOG
 ===
 
-### 3.5.2-dev (2020-10-28)
+### 3.5.2 (2020-10-28)
 
 - Switched timeouts to `wrapt_timeout_decorator` to fix bug with Python 3.8
 

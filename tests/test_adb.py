@@ -12,7 +12,7 @@ def ADB(mocker):
     mocker.patch('andriller.adb_conn.ADBConn.kill')
     with mock.patch('andriller.adb_conn.ADBConn.cmd_shell', return_value=fake_adb.name):
         adb = adb_conn.ADBConn()
-    adb_cmd = adb.adb.__func__.__wrapped__
+    adb_cmd = adb.adb.__func__
     setattr(adb, 'adb', lambda *args, **kwargs: adb_cmd(adb, *args, **kwargs))
     return adb
 

@@ -1,7 +1,12 @@
 CHANGELOG
 ===
 
-### 3.5.0 (2020-10-10)
+### 3.5.2 (2020-10-28)
+
+- Switched timeouts to `wrapt_timeout_decorator` to fix bug with Python 3.8
+
+
+### 3.5.1 (2020-10-15)
 
 - Critical fix in WhatsApp crypt decoding.
 - Improved SQLite database handling on erroneous text entries.

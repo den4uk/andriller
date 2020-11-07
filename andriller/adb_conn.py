@@ -8,7 +8,7 @@ import subprocess
 if sys.platform == 'win32':
     from .utils import placebo as timeout
 else:
-    from timeout_decorator import timeout
+    from wrapt_timeout_decorator import timeout
 from .config import CODEPATH  # noqa
 
 logger = logging.getLogger(__name__)

@@ -9,7 +9,6 @@ import tempfile
 import webbrowser
 import threading
 from contextlib import suppress
-from timeout_decorator.timeout_decorator import TimeoutError
 from . import utils
 from . import engines
 from . import messages

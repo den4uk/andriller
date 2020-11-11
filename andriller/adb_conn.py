@@ -158,7 +158,7 @@ class ADBConn:
         """
         file_path_strict = re.sub(' ', r'\ ', file_path)
         dst_path_strict = re.sub(' ', r'\ ', dst_path)
-        self.adb(f"pull {file_path_strict} {dst_path_strict}")
+        self.adb(f"pull {file_path_strict} '{dst_path_strict}'", **kwargs)
 
     def get_size(self, file_path, **kwargs) -> int:
         """
@@ -168,15 +168,17 @@ class ADBConn:
             file_path (str|Path): Remote file path.
         """
         file_path_strict = self.strict_name(file_path)
-        size = self.adb(f'shell stat -c %s {file_path_strict}', **kwargs)
-        if not size.isdigit():
-            size = self.adb(f'shell ls -nl {file_path_strict}', **kwargs).split()[3]
-            if not size.isdigit():
-                size = self.adb(f'shell wc -c < {file_path_strict}', **kwargs)
-                if not size.isdigit():
-                    self.logger.debug(f'Size Error: {size}')
-                    return -1
-        return int(size)
+        size_functions = [
+            lambda: self.adb(f'shell stat -c %s {file_path_strict}', **kwargs),
+            lambda: self.adb(f'shell ls -nl {file_path_strict}', **kwargs).split()[3],
+            lambda: self.adb(f'shell wc -c < {file_path_strict}', **kwargs),
+        ]
+        for size_function in size_functions:
+            size = size_function()
+            if size and size.isdigit():
+                return int(size)
+        self.logger.debug(f'Size Error for: {file_path}')
+        return -1
 
     @timeout(30, use_signals=False)
     def cmd_shell(self, cmd, code=False, **kwargs):

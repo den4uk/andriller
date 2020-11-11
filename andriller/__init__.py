@@ -1,7 +1,7 @@
-__version__ = '3.5.2'
+__version__ = '3.5.3'
 __app_name__ = 'Andriller CE'
 __package_name__ = 'andriller'
-__website__ = "https://github.com/den4uk/andriller"  # "https://www.andriller.com"
+__website__ = "https://github.com/den4uk/andriller"
 __license__ = 'MIT'
 
 import os

@@ -92,6 +92,8 @@ class ADBConn:
             if binary:
                 return run.stdout
             return run.stdout.decode().strip()
+        self.logger.warning(f'ADB cmd error for: {cmd}; Code: {run.returncode}')
+        return ''
 
     def cmditer(self, cmd):
         process = subprocess.Popen(

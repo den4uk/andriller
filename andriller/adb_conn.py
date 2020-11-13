@@ -5,13 +5,12 @@ import atexit
 import os.path
 import logging
 import subprocess
+from typing import List, Union
 if sys.platform == 'win32':
     from .utils import placebo as timeout
 else:
     from wrapt_timeout_decorator import timeout
 from .config import CODEPATH  # noqa
-
-logger = logging.getLogger(__name__)
 
 
 class ADBConn:
@@ -29,7 +28,7 @@ class ADBConn:
         'sideload-auto-reboot': 'sideload-auto-reboot',
     }
 
-    def __init__(self, logger=logger, log_level=logging.INFO):
+    def __init__(self, **kwargs):
         """
         logger: optional, pass a dedicated loggger instance, else default will be used.
         log_level: optional, logging level.
@@ -38,22 +37,28 @@ class ADBConn:
         self.adb_bin = None
         self.platform = sys.platform
         self.rmr = b'\r\n'
-        self.setup(log_level)
+        self._run_opt = None
+        self.setup_logging(**kwargs)
+        self.setup()
+        self._is_adb_out_post_v5 = False
         atexit.register(self.kill)
 
-    def setup(self, log_level):
-        self.logger = logger
+    def setup_logging(self, logger=None, log_level=logging.INFO, **kwargs):
+        self.logger = logger or logging.getLogger(__name__)
         self.logger.setLevel(log_level)
+
+    def setup(self):
         self.logger.debug(f'Platform: {self.platform}')
         if self.platform in self.UNIX:
             self.adb_bin = self.cmd_shell('which adb') or None
-            self.logger.debug(f'Using adb binary `{self.adb_bin}`')
+            self.logger.debug(f'Using adb binary: {self.adb_bin}')
         else:
             self.adb_bin = os.path.join(CODEPATH, 'bin', 'adb.exe')
             self._win_startupinfo()
         if not self.adb_bin or not os.path.exists(self.adb_bin):
             self.logger.warning('ADB binary is not found!')
             raise ADBConnError('ADB binary is not found!')
+        self._is_adb_out_post_v5 = self.cmd_shell(f'{self.adb_bin} exec-out id', code=True) == 0
 
     def _win_startupinfo(self):
         self.startupinfo = subprocess.STARTUPINFO()
@@ -62,17 +67,19 @@ class ADBConn:
 
     @property
     def run_opt(self):
-        opt = {'shell': False, 'startupinfo': self.startupinfo}
-        if tuple(sys.version_info) >= (3, 7):
-            opt['capture_output'] = True
-        else:
-            opt['stdout'] = subprocess.PIPE
-        return opt
+        if not self._run_opt:
+            opt = {'shell': False, 'startupinfo': self.startupinfo}
+            if tuple(sys.version_info) >= (3, 7):
+                opt['capture_output'] = True
+            else:
+                opt['stdout'] = subprocess.PIPE
+            self._run_opt = opt
+        return self._run_opt
 
     @timeout(60 * 60 * 2, use_signals=False)
-    def adb(self, cmd, binary=False, su=False, **kwargs) -> str:
+    def adb(self, cmd, binary=False, su=False, _for_out=False, **kwargs) -> Union[str, bytes]:
         """
-        Runs an adb command and returns the output as a string.
+        Runs an adb command and returns the output.
 
         Args:
             cmd (str): adb command.
@@ -80,20 +87,48 @@ class ADBConn:
             su (bool): use superuser if the target device has it.
 
         Example:
-            to run `adb shell id` do: self.adb('shell id')
+            to run `adb pull /path/myfile.txt` do: self.adb('shell id')
         """
+        cmd = self._get_adb_cmd(cmd, su, _for_out, **kwargs)
+        run = subprocess.run([self.adb_bin] + cmd, **self.run_opt)
+        return self._return_run_output(run, binary)
+
+    def adb_out(self, cmd, binary=False, su=False, **kwargs) -> Union[str, bytes]:
+        """
+        Uses adb to retrieve the output from remote device.
+
+        Args:
+            cmd (str): adb command.
+            binary (bool): returns bytes output instead of str.
+            su (bool): use superuser if the target device has it.
+
+        Example:
+            to run `adb shell id` do: self.adb_out('id')
+        """
+        return self.adb(cmd, binary=False, su=False, _for_out=True, **kwargs)
+
+    def _get_adb_cmd(self, cmd, su, _for_out, no_log=False, **kwargs) -> List[str]:
         if isinstance(cmd, str):
             cmd = shlex.split(cmd)
         if su:
             cmd.insert(0, 'su -c')
-        self.logger.debug(f'ADB: {cmd}')
-        run = subprocess.run([self.adb_bin] + cmd, **self.run_opt)
+        if _for_out:
+            cmd.insert(0, 'exec-out' if self._is_adb_out_post_v5 else 'shell')
+        if no_log is False:
+            self.logger.debug(f'ADB cmd: {cmd}')
+        return cmd
+
+    def _return_run_output(self, run: subprocess.CompletedProcess, binary: bool):
         if run.stdout and run.returncode == 0:
             if binary:
-                return run.stdout
-            return run.stdout.decode().strip()
-        self.logger.warning(f'ADB cmd error for: {cmd}; Code: {run.returncode}')
-        return ''
+                if self._is_adb_out_post_v5:
+                    return run.stdout
+                else:
+                    return self.unstrip(run.stdout)
+        return run.stdout.decode().strip()
+
+    def unstrip(self, data: bytes) -> bytes:
+        return re.sub(self.rmr, b'\n', data)
 
     def cmditer(self, cmd):
         process = subprocess.Popen(
@@ -125,7 +160,7 @@ class ADBConn:
         self.adb('start-server', timeout=10)
 
     def kill(self):
-        self.adb('kill-server', timeout=5)
+        self.adb('kill-server', timeout=5, no_log=True)
 
     @staticmethod
     def _file_regex(fp):

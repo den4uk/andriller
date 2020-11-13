@@ -75,11 +75,10 @@ class ChainExecution:
 
         def get_permission():
             self.su = False
-            if 'root' in self.adb('exec-out id'):
+            if self.ROOT in self.adb_out('id'):
                 self.permisson = self.ROOT
                 return self.permisson
-            try_su = self.adb('exec-out id', su=True)
-            if try_su is not None and self.ROOT in try_su:
+            if self.ROOT in self.adb_out('id', su=True):
                 self.permisson = self.ROOTSU
                 self.su = True
             else:
@@ -108,7 +107,7 @@ class ChainExecution:
 
         # Build Props
         with suppress(TimeoutError):
-            build_prop = self.adb('exec-out cat /system/build.prop', su=self.su, timeout=5)
+            build_prop = self.adb_out('cat /system/build.prop', su=self.su, timeout=5)
             if build_prop:
                 build_prop = build_prop.split('\n')
                 props = [
@@ -121,20 +120,20 @@ class ChainExecution:
 
         # WIFI
         with suppress(TimeoutError):
-            _wifi = self.adb('exec-out dumpsys wifi', timeout=5)
+            _wifi = self.adb_out('dumpsys wifi', timeout=5)
             if _wifi:
                 self.REPORT['wifi mac'] = get_wifi(_wifi.split('\n'))
 
         # IMEI
         with suppress(TimeoutError):
-            _usbinfo = self.adb('exec-out dumpsys iphonesubinfo', timeout=5)
+            _usbinfo = self.adb_out('dumpsys iphonesubinfo', timeout=5)
             if _usbinfo:
                 self.REPORT['imei'] = get_prop(_usbinfo.split('\n'), 'Device ID')
 
         # IMEI for Android v6+
         # with suppress(TimeoutError):
         #     rex = re.compile(b' ([0-9a-f]{8})')
-        #     _data = self.adb('adb shell service call iphonesubinfo 1', timeout=2)
+        #     _data = self.adb_out('service call iphonesubinfo 1', timeout=2)
         #     if _data and len(_data) > 9:
         #         plen = int(b''.join(_data[:2]), 16)
 
@@ -148,7 +147,7 @@ class ChainExecution:
         # SIM Card
         with suppress(TimeoutError, Exception):
             if self.adb.exists('/data/system/SimCard.dat'):
-                _simdat = self.adb('exec-out cat /data/system/SimCard.dat', su=self.su, timeout=5)
+                _simdat = self.adb_out('cat /data/system/SimCard.dat', su=self.su, timeout=5)
                 sims = [
                     'CurrentSimSerialNumber',
                     'CurrentSimPhoneNumber',
@@ -162,7 +161,7 @@ class ChainExecution:
 
         # Accounts
         with suppress(TimeoutError):
-            _acc = self.adb('exec-out dumpsys account', timeout=5)
+            _acc = self.adb_out('dumpsys account', timeout=5)
             self.REPORT['accounts'] = get_accounts(_acc)
 
     @staticmethod

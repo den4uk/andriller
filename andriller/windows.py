@@ -268,7 +268,7 @@ class MainWindow(BaseWindow):
         # Text Field + logger
         self.TF = tk.Text(
             textframe, font=self.FontMono, wrap=tk.WORD, width=65,
-            bg='white', height=self.conf('window_size'))
+            height=self.conf('window_size'))
         self.TF.bind('<Button-3>', rClicker, add='')
         self.TF.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.set_logger()
@@ -302,7 +302,8 @@ class MainWindow(BaseWindow):
         self.conf.check_latest_version(logger=self.logger)
 
         # Setup ADB logging
-        self.adb.setup_logging(logger=logger, log_level=self.log_level)
+        # do not pass self.logger as the logger, as the logger's lifetime is shorter, and is not reliable.
+        self.adb.setup_logging(log_level=self.log_level)
 
     @property
     def time_now_local(self):

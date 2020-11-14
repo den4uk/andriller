@@ -50,7 +50,7 @@ class ADBConn:
     def setup(self):
         self.logger.debug(f'Platform: {self.platform}')
         if self.platform in self.UNIX:
-            self.adb_bin = self.cmd_shell('which adb') or None
+            self.adb_bin = self._get_adb_bin()
             self.logger.debug(f'Using adb binary: {self.adb_bin}')
         else:
             self.adb_bin = os.path.join(CODEPATH, 'bin', 'adb.exe')
@@ -58,18 +58,21 @@ class ADBConn:
         if not self.adb_bin or not os.path.exists(self.adb_bin):
             self.logger.warning('ADB binary is not found!')
             raise ADBConnError('ADB binary is not found!')
-        self._is_adb_out_post_v5 = self.cmd_shell(f'{self.adb_bin} exec-out id', code=True) == 0
+        self._is_adb_out_post_v5 = self._adb_has_exec()
 
     def _win_startupinfo(self):
         self.startupinfo = subprocess.STARTUPINFO()
         self.startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         self.rmr = b'\r\r\n'
 
+    def _opt_use_capture(self) -> bool:
+        return tuple(sys.version_info) >= (3, 7)
+
     @property
     def run_opt(self):
         if not self._run_opt:
             opt = {'shell': False, 'startupinfo': self.startupinfo}
-            if tuple(sys.version_info) >= (3, 7):
+            if self._opt_use_capture():
                 opt['capture_output'] = True
             else:
                 opt['stdout'] = subprocess.PIPE
@@ -90,7 +93,7 @@ class ADBConn:
             to run `adb pull /path/myfile.txt` do: self.adb('shell id')
         """
         cmd = self._get_adb_cmd(cmd, su, _for_out, **kwargs)
-        run = subprocess.run([self.adb_bin] + cmd, **self.run_opt)
+        run = subprocess.run([self.adb_bin, *cmd], **self.run_opt)
         return self._return_run_output(run, binary)
 
     def adb_out(self, cmd, binary=False, su=False, **kwargs) -> Union[str, bytes]:
@@ -105,17 +108,16 @@ class ADBConn:
         Example:
             to run `adb shell id` do: self.adb_out('id')
         """
-        return self.adb(cmd, binary=False, su=False, _for_out=True, **kwargs)
+        return self.adb(cmd, binary=binary, su=su, _for_out=True, **kwargs)
 
-    def _get_adb_cmd(self, cmd, su, _for_out, no_log=False, **kwargs) -> List[str]:
+    def _get_adb_cmd(self, cmd, su, _for_out, **kwargs) -> List[str]:
         if isinstance(cmd, str):
             cmd = shlex.split(cmd)
         if su:
             cmd.insert(0, 'su -c')
         if _for_out:
             cmd.insert(0, 'exec-out' if self._is_adb_out_post_v5 else 'shell')
-        if no_log is False:
-            self.logger.debug(f'ADB cmd: {cmd}')
+        self.logger.debug(f'ADB cmd: {cmd}')
         return cmd
 
     def _return_run_output(self, run: subprocess.CompletedProcess, binary: bool):
@@ -160,7 +162,7 @@ class ADBConn:
         self.adb('start-server', timeout=10)
 
     def kill(self):
-        self.adb('kill-server', timeout=5, no_log=True)
+        self.adb('kill-server', timeout=5)
 
     @staticmethod
     def _file_regex(fp):
@@ -219,13 +221,19 @@ class ADBConn:
 
     @timeout(30, use_signals=False)
     def cmd_shell(self, cmd, code=False, **kwargs):
-        self.logger.debug(f'CMD: {cmd}')
+        self.logger.debug(f'CMD cmd: {cmd}')
         run = subprocess.run(shlex.split(cmd), **self.run_opt)
         if code:
             return run.returncode
         else:
             if run.stdout:
                 return run.stdout.decode().strip()
+
+    def _get_adb_bin(self):
+        return self.cmd_shell('which adb') or None
+
+    def _adb_has_exec(self) -> bool:
+        return self.cmd_shell(f'{self.adb_bin} exec-out id', code=True) == 0
 
     def reboot(self, mode=None):
         mode = self.MODES.get(mode, '')

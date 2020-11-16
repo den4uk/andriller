@@ -35,7 +35,7 @@ class ADBConn:
         """
         self.startupinfo = None
         self.adb_bin = None
-        self.platform = sys.platform
+        self.is_unix = sys.platform in self.UNIX
         self.rmr = b'\r\n'
         self._run_opt = None
         self.setup_logging(**kwargs)
@@ -48,11 +48,11 @@ class ADBConn:
         self.logger.setLevel(log_level)
 
     def setup(self):
-        self.logger.debug(f'Platform: {self.platform}')
-        if self.platform in self.UNIX:
+        self.logger.debug(f'Platform: {sys.platform}')
+        if self.is_unix:
             self.adb_bin = self._get_adb_bin()
             self.logger.debug(f'Using adb binary: {self.adb_bin}')
-        else:
+        else:  # is Windows
             self.adb_bin = os.path.join(CODEPATH, 'bin', 'adb.exe')
             self._win_startupinfo()
         if not self.adb_bin or not os.path.exists(self.adb_bin):
@@ -112,7 +112,7 @@ class ADBConn:
 
     def _get_adb_cmd(self, cmd, su, _for_out, **kwargs) -> List[str]:
         if isinstance(cmd, str):
-            cmd = shlex.split(cmd)
+            cmd = self.split_cmd(cmd)
         if su:
             cmd.insert(0, 'su -c')
         if _for_out:
@@ -134,7 +134,7 @@ class ADBConn:
 
     def cmditer(self, cmd):
         process = subprocess.Popen(
-            shlex.split(cmd),
+            self.split_cmd(cmd),
             shell=False,
             startupinfo=self.startupinfo,
             stdout=subprocess.PIPE)
@@ -170,7 +170,7 @@ class ADBConn:
 
     def exists(self, file_path, **kwargs):
         file_path_strict = self.strict_name(file_path)
-        file_remote = self.adb(f'shell ls {file_path_strict}', **kwargs)
+        file_remote = self.adb_out(f'ls {file_path_strict}', **kwargs)
         if not file_remote:
             return None
         if re.match(self._file_regex(file_path), file_remote):
@@ -184,7 +184,7 @@ class ADBConn:
             file_path (str|Path): Remote file path.
         """
         file_path_strict = self.strict_name(file_path)
-        data = self.adb(f'exec-out cat {file_path_strict}', binary=True, **kwargs)
+        data = self.adb_out(f'cat {file_path_strict}', binary=True, **kwargs)
         return data
 
     def pull_file(self, file_path, dst_path, **kwargs):
@@ -208,9 +208,9 @@ class ADBConn:
         """
         file_path_strict = self.strict_name(file_path)
         size_functions = [
-            lambda: self.adb(f'shell stat -c %s {file_path_strict}', **kwargs),
-            lambda: self.adb(f'shell ls -nl {file_path_strict}', **kwargs).split()[3],
-            lambda: self.adb(f'shell wc -c < {file_path_strict}', **kwargs),
+            lambda: self.adb_out(f'stat -c %s {file_path_strict}', **kwargs),
+            lambda: self.adb_out(f'ls -nl {file_path_strict}', **kwargs).split()[3],
+            lambda: self.adb_out(f'wc -c < {file_path_strict}', **kwargs),
         ]
         for size_function in size_functions:
             size = size_function()
@@ -220,9 +220,9 @@ class ADBConn:
         return -1
 
     @timeout(30, use_signals=False)
-    def cmd_shell(self, cmd, code=False, **kwargs):
-        self.logger.debug(f'CMD cmd: {cmd}')
-        run = subprocess.run(shlex.split(cmd), **self.run_opt)
+    def cmd_shell(self, cmd: str, code: bool = False, **kwargs):
+        self.logger.debug(f'Shell cmd: {cmd}')
+        run = subprocess.run(self.split_cmd(cmd), **self.run_opt)
         if code:
             return run.returncode
         else:
@@ -233,7 +233,14 @@ class ADBConn:
         return self.cmd_shell('which adb') or None
 
     def _adb_has_exec(self) -> bool:
-        return self.cmd_shell(f'{self.adb_bin} exec-out id', code=True) == 0
+        cmd = f'{self.adb_bin} exec-out id'
+        return self.cmd_shell(cmd, code=True) == 0
+
+    def split_cmd(self, cmd: str) -> list:
+        if self.is_unix:
+            return shlex.split(cmd)
+        else:
+            return cmd.split(' ')
 
     def reboot(self, mode=None):
         mode = self.MODES.get(mode, '')

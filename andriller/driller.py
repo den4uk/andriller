@@ -140,13 +140,12 @@ class ChainExecution:
         # Time
         with suppress(TimeoutError):
             self.REPORT['local_time'] = time.strftime('%Y-%m-%d %H:%M:%S %Z')
-            rtime = self.adb(['shell', 'date', r'+%F\ %T\ %Z'], timeout=5)
-            # breakpoint()
+            rtime = self.adb.adb_out(r'date +%F\ %T\ %Z', timeout=5)
             self.REPORT['device_time'] = rtime.split(self.adb.rmr.decode())[-1]
 
         # SIM Card
         with suppress(TimeoutError, Exception):
-            if self.adb.exists('/data/system/SimCard.dat'):
+            if self.adb.exists('/data/system/SimCard.dat', su=self.su):
                 _simdat = self.adb.adb_out('cat /data/system/SimCard.dat', su=self.su, timeout=5)
                 sims = [
                     'CurrentSimSerialNumber',

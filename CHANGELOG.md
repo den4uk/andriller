@@ -1,10 +1,11 @@
 CHANGELOG
 ===
 
-### 3.5.3 (2020-11-11)
+### 3.5.3 (2020-11-17)
 
 - Bugfix related to file size retrieval from the remote device.
 - File pull bug using adb (with root), affecting Windows.
+- Improvements for backwards support on older Android versions.
 
 
 ### 3.5.2 (2020-10-28)

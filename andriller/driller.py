@@ -140,7 +140,8 @@ class ChainExecution:
         # Time
         with suppress(TimeoutError):
             self.REPORT['local_time'] = time.strftime('%Y-%m-%d %H:%M:%S %Z')
-            rtime = self.adb.adb_out(r'date +%F\ %T\ %Z', timeout=5)
+            rtime = self.adb.adb_out(r"date '+%F\ %T\ %Z'", timeout=5)
+            rtime = rtime.replace('\\', '')
             self.REPORT['device_time'] = rtime.split(self.adb.rmr.decode())[-1]
 
         # SIM Card

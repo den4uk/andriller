@@ -52,6 +52,7 @@ class TextFieldHandler(logging.Handler):
             self.tk_obj.insert('end', f'{log}\n')
             self.tk_obj.see('end')
         except Exception:
+            # with contextlib.suppress(Exception):
             self.handleError(record)
 
 
@@ -172,8 +173,7 @@ class MainWindow(BaseWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.set_title()
-        # ADB moved to the bottom once the logger handler is configured
-        # self.adb = adb_conn.ADBConn(logger=logger, log_level=self.log_level)
+        self.adb = adb_conn.ADBConn()
         self.registry = decoders.Registry()
         self.menubar = tk.Menu(self.root, tearoff=0)
         self.root['menu'] = self.menubar
@@ -268,7 +268,7 @@ class MainWindow(BaseWindow):
         # Text Field + logger
         self.TF = tk.Text(
             textframe, font=self.FontMono, wrap=tk.WORD, width=65,
-            bg='white', height=self.conf('window_size'))
+            height=self.conf('window_size'))
         self.TF.bind('<Button-3>', rClicker, add='')
         self.TF.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.set_logger()
@@ -301,9 +301,9 @@ class MainWindow(BaseWindow):
         logger.info(f"Time in reports:  {self.time_now_configured} <--")  # \u2190
         self.conf.check_latest_version(logger=self.logger)
 
-        # Setup ADB
-        # def setup_adb(self):
-        self.adb = adb_conn.ADBConn(logger=logger, log_level=self.log_level)
+        # Setup ADB logging
+        # do not pass self.logger as the logger, as the logger's lifetime is shorter, and is not reliable.
+        self.adb.setup_logging(log_level=self.log_level)
 
     @property
     def time_now_local(self):

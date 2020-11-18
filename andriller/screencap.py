@@ -47,7 +47,7 @@ class ScreenStore:
         if not serial:
             return None
         tmp_img = tempfile.NamedTemporaryFile(delete=False, prefix=f'{serial}_', suffix='.png')
-        raw_cap = self.adb.adb('exec-out screencap -p', binary=True)
+        raw_cap = self.adb.adb_out('screencap -p', binary=True)
         if not raw_cap or set(raw_cap) == {0}:
             return False
         elif isinstance(raw_cap, bytes) and re.match(b'\x89PNG', raw_cap):

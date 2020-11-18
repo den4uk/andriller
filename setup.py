@@ -17,7 +17,7 @@ setup(
     version=__version__,
     description='Andriller CE | Android Forensic Tools',
     author='Denis Sazonov',
-    author_email='den (at) saz (dot) lt',
+    author_email='den@saz.lt',
     url=__website__,
     packages=[__package_name__],
     license='MIT License',

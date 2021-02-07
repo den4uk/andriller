@@ -1,8 +1,9 @@
-__version__ = '3.5.3'
+__version__ = '3.6.0'
 __app_name__ = 'Andriller CE'
 __package_name__ = 'andriller'
 __website__ = "https://github.com/den4uk/andriller"
 __license__ = 'MIT'
+__all__ = ['guicomps']
 
 import os
 import logging
@@ -37,7 +38,7 @@ def run():
         os.environ['NOTHREAD'] = '1'
 
     # Run main App
-    from . import windows
+    from .gui import windows
     try:
         root = windows.MainWindow(log_level=level)
         root.mainloop()

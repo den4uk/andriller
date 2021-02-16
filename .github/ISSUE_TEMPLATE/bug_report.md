@@ -23,16 +23,22 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Environment (please complete the following information):**
+ - OS: [e.g. Windows 10 / Ubuntu 20.04 LTS]
+ - Andriller version [e.g. 3.5.3]
+ - Was it an installer or run from source (installer/source). If from source, answer next questions.
+ - Python version [e.g. 3.7.9]
+ - ADB binary path [on a unix OS, cmd: `$ which adb`]
+ - ADB version [cmd: `$ adb version` ]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Target Android device (where applicable):**
+ - When a device is connected, is it recognised when clicked on **Check**? [Yes/No]
+ - Device make / model: [e.g. Samsung GT-i9300]
+ - Android OS: [e.g. 9.0]
+ - Screenlock present? [e.g. Yes, known credentials / Unknown credentials /  No screenlock]
+
+**Error Log / Traceback**
+Include any error logs or tracebacks from the terminal/console.
 
 **Additional context**
 Add any other context about the problem here.

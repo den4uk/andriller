@@ -34,12 +34,12 @@ Andriller - is software utility with a collection of forensic tools for smartpho
 
 [Ubuntu/Debian] Install from Terminal:
 ```bash
-$ sudo apt-get install android-tools-adb python3-tk
+sudo apt-get install android-tools-adb python3-tk
 ```
 
 [Mac] Install from brew cask:
 ```bash
-$ brew cask install android-platform-tools
+brew cask install android-platform-tools
 ```
 
 [Windows] : _Included._
@@ -48,12 +48,12 @@ $ brew cask install android-platform-tools
 ## Installation (Recommended way)
 Create a virtual environment using Python 3:
 ```bash
-$ python3 -m venv env
+python3 -m venv env
 ```
 
 Activate the virtual environment (Linux/Mac):
 ```bash
-$ source env/bin/activate
+source env/bin/activate
 ```
 
 Activate the virtual environment (Windows):
@@ -63,13 +63,13 @@ Activate the virtual environment (Windows):
 
 Install Andriller with its Python dependencies (same command to upgrade it):
 ```bash
-(env) $ pip install andriller -U
+pip install andriller -U
 ```
 
 
 ## Quick Start (run GUI)
 ```bash
-(env) $ python -m andriller
+python -m andriller
 ```
 
 

@@ -7,7 +7,7 @@ def about_msg():
 About {__app_name__}', f"\
 Version: {__version__}\n\
 License: {__license__}\n\
-Copyright \u00A9 2012-2019\n\
+Copyright \u00A9 2012-2021\n\
 Website: {__website__}")
 
 

@@ -1,6 +1,6 @@
 Andriller CE (Community Edition)
 =====
-[![Build Status](https://travis-ci.org/den4uk/andriller.svg?branch=master)](https://travis-ci.org/den4uk/andriller)
+![Build Workflow](https://github.com/den4uk/andriller/actions/workflows/python-package-test.yml/badge.svg)
 [![License](https://img.shields.io/github/license/den4uk/andriller.svg)](https://pypi.python.org/pypi/andriller)
 [![PyPI Version](http://img.shields.io/pypi/v/andriller.svg)](https://pypi.python.org/pypi/andriller)
 [![Twitter Follow](https://img.shields.io/twitter/follow/den4uk?style=social)](https://twitter.com/den4uk)
@@ -34,12 +34,12 @@ Andriller - is software utility with a collection of forensic tools for smartpho
 
 [Ubuntu/Debian] Install from Terminal:
 ```bash
-$ sudo apt-get install android-tools-adb python3-tk
+sudo apt-get install android-tools-adb python3-tk
 ```
 
 [Mac] Install from brew cask:
 ```bash
-$ brew cask install android-platform-tools
+brew cask install android-platform-tools
 ```
 
 [Windows] : _Included._
@@ -48,28 +48,28 @@ $ brew cask install android-platform-tools
 ## Installation (Recommended way)
 Create a virtual environment using Python 3:
 ```bash
-$ python3 -m venv env
+python3 -m venv env
 ```
 
 Activate the virtual environment (Linux/Mac):
 ```bash
-$ source env/bin/activate
+source env/bin/activate
 ```
 
 Activate the virtual environment (Windows):
 ```ps1
-> .\env\Scripts\activate
+.\env\Scripts\activate
 ```
 
 Install Andriller with its Python dependencies (same command to upgrade it):
 ```bash
-(env) $ pip install andriller -U
+pip install andriller -U
 ```
 
 
 ## Quick Start (run GUI)
 ```bash
-(env) $ python -m andriller
+python -m andriller
 ```
 
 
@@ -88,4 +88,4 @@ Bugs and issues can be submitted in the ([Issues](https://github.com/den4uk/andr
 ## Donations
 You may make donations to the projects, or you can also just _buy me a beer_:
 
-[![Donate](https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=\_s-xclick&hosted\_button\_id=8AHFL65LMTLLE&source=url)
+[![Donate](https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?hosted_button_id=87EX8N3N3SS6C)

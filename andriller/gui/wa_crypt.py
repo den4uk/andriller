@@ -106,6 +106,7 @@ class WhatsAppCrypt(BaseWindow):
         sel = self.file_box.selection()
         if not sel:
             messagebox.showwarning('No selection made', 'Select at least one database to decrypt.')
+            return
         self.run_decrypt(sel)
 
     @threaded

@@ -42,7 +42,7 @@ class BaseWindow:
             self.root = tk.Toplevel(root, takefocus=True)
             self.root.protocol("WM_TAKE_FOCUS")
             self.root.transient(root)
-            self.root.bind('<Escape>', self.root.destroy)
+            self.root.bind('<Escape>', lambda e: self.root.destroy)
         else:
             self.root = tk.Tk()
             self.root.bind('<Double-Escape>', self.quit_app)

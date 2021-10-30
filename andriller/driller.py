@@ -334,7 +334,7 @@ class ChainExecution:
         self.update('Decoding extracted data...')
         self.logger.debug(self.DOWNLOADS)
         workbook = self.get_master_workbook()
-        for file_name in filter(None.__ne__, self.DOWNLOADS):
+        for file_name in filter(None, self.DOWNLOADS):
             if self.registry.has_target(file_name):
                 for deco_class in self.registry.decoders_target(file_name):
                     file_path = os.path.join(self.output_dir, file_name)

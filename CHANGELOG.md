@@ -1,6 +1,15 @@
 CHANGELOG
 ===
 
+### 3.6.0 (2021-10-30)
+
+- GUI restructured
+- Bugfix with WA decoder
+- Dependencies updated
+- CI/CD pipelines changed to Github Actions
+- Minor FB decoding bugfix when no stickers column is present
+
+
 ### 3.5.3 (2020-11-17)
 
 - Bugfix related to file size retrieval from the remote device.

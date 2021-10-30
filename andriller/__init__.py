@@ -3,7 +3,7 @@ __app_name__ = 'Andriller CE'
 __package_name__ = 'andriller'
 __website__ = "https://github.com/den4uk/andriller"
 __license__ = 'MIT'
-__all__ = ['guicomps']
+__all__ = ['gui']
 
 import os
 import logging

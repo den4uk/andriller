@@ -572,8 +572,9 @@ class FacebookMessagesDecoder(AndroidDecoder):
                 self.stickers[k] = v
 
     def get_sticker(self, item):
-        sticker = item['sticker_id']
-        return self.stickers.get(sticker)
+        sticker = item.get('sticker_id')
+        if sticker:
+            return self.stickers.get(sticker)
 
     def get_recipients(self, item):
         return [

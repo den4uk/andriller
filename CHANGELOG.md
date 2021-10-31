@@ -1,6 +1,11 @@
 CHANGELOG
 ===
 
+### 3.6.1 (2021-10-31)
+
+- Bugfix for the package gui modules not being included when building.
+
+
 ### 3.6.0 (2021-10-30)
 
 - GUI restructured

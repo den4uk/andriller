@@ -3,3 +3,4 @@
 flake8
 pytest-cov
 pytest-mock
+wheel

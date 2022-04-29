@@ -83,15 +83,14 @@ def get_koi(payload, keys: list) -> dict:
     Flattens the object and gets values for keys
     """
     # Cleanup the object
-    if payload and type(payload) == str:
-        try:
+    if payload and isinstance(payload, str):
+        with contextlib.suppress(Exception):
             payload = re.sub('\n', '', payload)
             return get_koi(json.loads(payload), keys)
-        except Exception:
-            return {}
+        return {}
 
     targets = [str, int, float, bool]
-    result = {k: None for k in keys}
+    result = dict.fromkeys(keys)
 
     def process(payload):
         if isinstance(payload, dict):
@@ -105,7 +104,7 @@ def get_koi(payload, keys: list) -> dict:
             for i in payload:
                 process(i)
 
-    if payload and type(payload) in [list, dict]:
+    if payload and isinstance(payload, (list, dict)):
         process(payload)
     return result if set(result.values()) else {}
 
@@ -142,12 +141,11 @@ class DrillerTools:
             pass
 
     @classmethod
-    def ab_to_tar(cls, input_file, to_tmp=True):
+    def ab_to_tar(cls, input_file: str, to_tmp: bool = False, buffer: int = (2 ** 20)):
         """
         Takes AB file, and converts it to a tarball, return file path to tar
         If to_tmp is set to False, converts into same directory
         """
-        BUFFER = 2 ** 20
         with open(input_file, 'rb') as backup_file:
             cls.ab_file_verify(backup_file)
             # TODO: make it responsive to encrypted backups
@@ -156,7 +154,7 @@ class DrillerTools:
                 to_tmp else open(f'{input_file}.tar', 'wb')
             zlib_obj = zlib.decompressobj()
             while True:
-                d = backup_file.read(BUFFER)
+                d = backup_file.read(buffer)
                 if not d:
                     break
                 c = zlib_obj.decompress(d)
@@ -166,10 +164,12 @@ class DrillerTools:
             return temptar.name
 
     @staticmethod
-    def extract_form_tar(src_file, dst_dir, targets=[], full=False):
+    def extract_form_tar(src_file, dst_dir, targets: list = None, full=False):
         """
         Yields tar file names, uses a list of targets or a full extraction
         """
+        if targets is None:
+            targets = []
         with tarfile.open(src_file) as tar:
             for tar_name in tar.getnames():
                 try:

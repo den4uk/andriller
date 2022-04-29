@@ -1,6 +1,12 @@
 CHANGELOG
 ===
 
+### 3.6.2 (2022-04-29)
+
+- Dependency pins for Jinja2 and MarkupSafe
+- Tar extraction to local (from temp path, which can be limited in size)
+
+
 ### 3.6.1 (2021-10-31)
 
 - Bugfix for the package gui modules not being included when building.

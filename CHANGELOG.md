@@ -1,6 +1,11 @@
 CHANGELOG
 ===
 
+### 3.6.3 (2022-04-30)
+
+- Support for Python 3.10
+
+
 ### 3.6.2 (2022-04-29)
 
 - Dependency pins for Jinja2 and MarkupSafe

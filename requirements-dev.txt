@@ -1,5 +1,4 @@
 -r requirements.txt
--e .
 flake8
 pytest-cov
 pytest-mock

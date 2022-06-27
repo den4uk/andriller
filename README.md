@@ -37,9 +37,9 @@ Andriller - is software utility with a collection of forensic tools for smartpho
 sudo apt-get install android-tools-adb python3-tk
 ```
 
-[Mac] Install from brew cask:
+[Mac] Install from Homebrew:
 ```bash
-brew cask install android-platform-tools
+brew install android-platform-tools
 ```
 
 [Windows] : _Included._
